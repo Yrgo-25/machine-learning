@@ -1,0 +1,39 @@
+# Set pipeline name.
+name: CI
+
+# Set pipeline triggers.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Define pipeline jobs.
+jobs:
+  # Build practice exam code, run on latest Ubuntu runner.
+  build-practice_exam:
+    name: Build practice exam code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Build
+        run: bash ci/build.sh
+
+  # Check code formatting, run on latest Ubuntu runner.
+  format-check:
+    name: Check formatting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Install clang-format
+        run: sudo apt-get update && sudo apt-get install -y clang-format
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Install black
+        run: pip install -r requirements.txt
+      - name: Check formatting
+        run: bash ci/format.sh --check
