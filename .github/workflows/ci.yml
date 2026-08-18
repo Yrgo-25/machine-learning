@@ -18,7 +18,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
       - name: Build
-        run: bash ci/build.sh
+        run: make build
 
   # Check code formatting, run on latest Ubuntu runner.
   format-check:
@@ -36,4 +36,4 @@ jobs:
       - name: Install black
         run: pip install -r requirements.txt
       - name: Check formatting
-        run: bash ci/format.sh --check
+        run: make format-check
