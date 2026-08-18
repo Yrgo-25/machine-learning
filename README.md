@@ -37,12 +37,33 @@ projects/    Projektbeskrivningar, krav och inlämningsinstruktioner
 
 ---
 
+## Kodexempel
+[cnn_demo](./lectures/L13/cnn_demo) (L13) är en komplett C++17-implementation av ett konvolutionellt
+neuralt nätverk som tränas att klassificera 4×4-pixelbilder av siffrorna 0-3. Demot visar hur lagren
+hänger ihop från indata till prediktion:
+* `conv_layer::Conv`: conv-lager med en kernel, en bias samt "same"-padding.
+* `conv_layer::MaxPool`: icke-överlappande maxpooling.
+* `flatten_layer::Flatten`: formar om 2D-matrisen till en 1D-vektor.
+* `dense_layer::Dense`: fullt uppkopplat utgångslager med one-hot-kodad utdata.
+
+Bygg och kör med `make` i katalogen; se [README](./lectures/L13/cnn_demo/README.md) för en
+genomgång av arkitekturen.
+
+---
+
 ## Kodformattering
 `ci/format.sh` formaterar C/C++-kod med `clang-format` samt Python-kod med `black`:
 
 ```bash
 ci/format.sh          # Formatera alla filer.
 ci/format.sh --check  # Kontrollera formattering utan att ändra filer.
+```
+
+Samma sak går att köra via rotens `Makefile`:
+
+```bash
+make format        # Formatera alla filer.
+make format-check  # Kontrollera formattering utan att ändra filer.
 ```
 
 Innan skriptet körs behöver `clang-format` samt `black` finnas installerade och tillgängliga i
