@@ -67,13 +67,18 @@ I headerfilen `ml/dense_layer/dense.h`, lägg till klass döpt `Dense`, som ärv
 
 ---
 
-### 5. Borttagna konstruktorer och operatorer
-Radera följande:
-* Defaultkonstruktorn.
-* Kopieringskonstruktorn.
-* Förflyttningskonstruktorn.
-* Kopieringsoperatorn.
-* Förflyttningsoperatorn.
+### 5. Privata medlemsvariabler
+Lägg till följande privata medlemsvariabler i klassen:
+* `myOutput`: Vektor innehållande nodernas output (flyttal). Ska ha utrymme för ett värde per nod i lagret.
+* `myPreActivationOutput`: Vektor innehållande nodernas viktade summa innan aktiveringsfunktionen
+  har applicerats (flyttal). Ska ha utrymme för ett värde per nod i lagret. Används av `backpropagate()`
+  (se **L09**) för att beräkna aktiveringsfunktionens derivata korrekt.
+* `myError`: Vektor innehållande nodernas fel (flyttal). Ska ha utrymme för ett värde per nod i lagret.
+* `myBias`: Vektorn innehållande nodernas bias-värden (flyttal). Ska ha utrymme för ett värde per nod i lagret.
+* `myWeights`: Tvådimensionell vektor innehållande nodernas vikter. Ska ha utrymme för en vikt per nod och ingång, dvs. antalet noder x antalet vikter per nod.
+* `myActFunc`: Lagrets aktiveringsfunktion (av typen `ActFunc`).
+
+Medlemsvariablerna läggs till före konstruktorn, så att ni vet exakt vad konstruktorn ska initiera.
 
 ---
 
@@ -88,16 +93,13 @@ Skapa en konstruktor som ska kunna användas för att skapa ett dense-lager med 
 
 ---
 
-### 7. Privata medlemsvariabler
-Lägg till följande privata medlemsvariabler i klassen:
-* `myOutput`: Vektor innehållande nodernas output (flyttal). Ska ha utrymme för `nodeCount` värden.
-* `myPreActivationOutput`: Vektor innehållande nodernas viktade summa innan aktiveringsfunktionen
-  har applicerats (flyttal). Ska ha utrymme för `nodeCount` värden. Används av `backpropagate()`
-  (se **L09**) för att beräkna aktiveringsfunktionens derivata korrekt.
-* `myError`: Vektor innehållande nodernas fel (flyttal). Ska ha utrymme för `nodeCount` värden.
-* `myBias`: Vektorn innehållande nodernas bias-värden (flyttal). Ska ha utrymme för `nodeCount` värden.
-* `myWeights`: Tvådimensionell vektor innehållande nodernas vikter. Ska ha utrymme för `nodeCount` x `weightCount` värden.
-* `myActFunc`: Lagrets aktiveringsfunktion (av typen `ActFunc`).
+### 7. Borttagna konstruktorer och operatorer
+Radera följande:
+* Defaultkonstruktorn.
+* Kopieringskonstruktorn.
+* Förflyttningskonstruktorn.
+* Kopieringsoperatorn.
+* Förflyttningsoperatorn.
 
 ---
 

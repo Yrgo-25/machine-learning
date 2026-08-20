@@ -63,47 +63,25 @@ I denna namnrymd, implementera ett interface döpt `Interface` med följande pub
 ---
 
 ### 6. Underklass: Fixed
-I headerfilen `ml/lin_reg/fixed.h`, lägg till namnrymden `ml::lin_reg`. Implementera en underklass döpt `Fixed` som ärver `Interface` via publikt arv. Klassen ska inte kunna ärvas vidare, dvs. den ska markeras `final`.
+I headerfilen `ml/lin_reg/fixed.h`, lägg till namnrymden `ml::lin_reg`. Utgå från interfacet och gör om det till en underklass:
+1. Kopiera in innehållet från `interface.h`, inklusive `#pragma once` samt namnrymden `ml::lin_reg`.
+2. Inkludera `ml/lin_reg/interface.h`, så att basklassen är känd.
+3. Döp om klassen till `Fixed` och låt den ärva `Interface` via publikt arv. Klassen ska inte kunna ärvas vidare, dvs. den ska markeras `final`.
+4. Ta bort `virtual` samt `= 0` från metoderna; markera dem `override` i stället.
 
 Klassen döps till `Fixed` eftersom den tränas med en fast (*fixed*) lärhastighet. En variant med adaptiv lärhastighet, `Adaptive`, kommer ni att implementera i grupp under **P03**.
 
-Klassen ska inneha följande publika metoder:
-* **`Fixed()`:** 
-    * Klassens enda implementerade konstruktor.
-    * Ska ha följande ingående argument:
-        * `trainInput`: Referens till en skrivskyddad vektor med flyttal (träningsdata, indata).
-        * `trainOutput`: Referens till en skrivskyddad vektor med flyttal (träningsdata, utdata).
-    * Ska markeras `explicit` samt `noexcept`.
+Efter omvandlingen ska klassen inneha följande publika metoder:
 * **`~Fixed()`:** 
     * Destruktor som överlagrar interfacets destruktor.
     * Ska markeras `default`, `noexcept` samt `override`.
 * **`predict()`:** 
     * Överlagring av motsvarande metod i interfacet.
     * Ska markeras `const`, `noexcept` samt `override`.
-* **`train()`:** 
-    * Tränar modellen med ingående argument:
-        * `epochCount`: Antal epoker att träna (osignerat heltal).
-        * `learningRate`: Lärhastighet som flyttal. Defaultvärde: `0.01` (1 %).
-    * Returnerar `false` om `epochCount` är 0, eller om `learningRate` ligger utanför intervallet `(0.0, 1.0)`. Annars returneras `true` efter genomförd träning.
-    * Ska markeras `noexcept`.
-
-Klassen ska inneha följande privata metoder:
-* **`optimize()`:**
-    * Ingående argument:
-        * `input`: Indatavärde (`x`) som ett flyttal.
-        * `output`: Referensvärde (`y_ref`) som ett flyttal.
-        * `learningRate`: Lärhastigheten (`LR`) som ett flyttal.
-    * Returnerar ingenting.
-    * Ska markeras `noexcept`.
 
 ---
 
-### 7. Borttagna konstruktorer och operatorer
-Radera klassens defaultkonstruktor, kopierings- och förflyttningskonstruktorer samt tillhörande operatorer.
-
----
-
-### 8. Privata medlemsvariabler
+### 7. Privata medlemsvariabler
 Lägg till följande privata medlemsvariabler i `Fixed`:
 * **`myTrainInput`:** 
     * Referens till träningsdatans indatapunkter.
@@ -120,14 +98,53 @@ Lägg till följande privata medlemsvariabler i `Fixed`:
     * Modellens viktvärde (k-värdet i `y = kx + m`).
     * Ska vara av flyttalstyp.
 * **`mySetCount`:** 
-    * Antalet fullständiga träningsuppsättningar, dvs. `std::min(trainInput.size(), trainOutput.size())` (`std::min` finns i `<algorithm>`).
+    * Antalet fullständiga träningsuppsättningar, dvs. `std::min(myTrainInput.size(), myTrainOutput.size())` (`std::min` finns i `<algorithm>`).
     * Träningsdata som innehåller fler indata än utdata, eller tvärtom, har inga fullständiga uppsättningar bortom den kortaste av de två vektorerna, så överskottsvärdena är oanvändbara.
     * Initieras i konstruktorn.
     * Ska vara ett osignerat heltal (`std::size_t`, från `<cstddef>`) och markeras `const`.
 
+Medlemsvariablerna läggs till före konstruktorn, så att ni vet exakt vad konstruktorn ska initiera.
+
 ---
 
-### 9. Konstruktor
+### 8. Konstruktor - deklaration
+Lägg till klassens enda implementerade konstruktor som publik metod:
+* **`Fixed()`:** 
+    * Ska ha följande ingående argument:
+        * `trainInput`: Referens till en skrivskyddad vektor med flyttal (träningsdata, indata).
+        * `trainOutput`: Referens till en skrivskyddad vektor med flyttal (träningsdata, utdata).
+    * Ska markeras `explicit` samt `noexcept`.
+
+Konstruktorn deklareras enbart här; den implementeras i uppgift 11.
+
+---
+
+### 9. Borttagna konstruktorer och operatorer
+Radera klassens defaultkonstruktor, kopierings- och förflyttningskonstruktorer samt tillhörande operatorer.
+
+---
+
+### 10. Övriga metoder - deklaration
+Lägg till följande publika metod i `Fixed`:
+* **`train()`:** 
+    * Tränar modellen med ingående argument:
+        * `epochCount`: Antal epoker att träna (osignerat heltal).
+        * `learningRate`: Lärhastighet som flyttal. Defaultvärde: `0.01` (1 %).
+    * Returnerar `false` om `epochCount` är 0, eller om `learningRate` ligger utanför intervallet `(0.0, 1.0)`. Annars returneras `true` efter genomförd träning.
+    * Ska markeras `noexcept`.
+
+Lägg också till följande privata metod:
+* **`optimize()`:**
+    * Ingående argument:
+        * `input`: Indatavärde (`x`) som ett flyttal.
+        * `output`: Referensvärde (`y_ref`) som ett flyttal.
+        * `learningRate`: Lärhastigheten (`LR`) som ett flyttal.
+    * Returnerar ingenting.
+    * Ska markeras `noexcept`.
+
+---
+
+### 11. Konstruktor - implementation
 Implementera konstruktorn i `source/ml/lin_reg/fixed.cpp`:
 * Initiera alla medlemsvariabler. 
 * Sätt `mySetCount` till antalet fullständiga träningsuppsättningar, dvs. det minsta av de två vektorernas storlekar.
@@ -136,7 +153,7 @@ Implementera konstruktorn i `source/ml/lin_reg/fixed.cpp`:
 
 ---
 
-### 10. Prediktion
+### 12. Prediktion
 Implementera metoden `predict()` i `source/ml/lin_reg/fixed.cpp`.
 
 Returnera en prediktion enligt formeln:
@@ -151,7 +168,7 @@ där:
 
 ---
 
-### 11. Träning
+### 13. Träning
 Implementera metoden `train()` i `source/ml/lin_reg/fixed.cpp`:
 * Returnera `false` direkt om `epochCount` är 0, eller om `learningRate` ligger utanför intervallet `(0.0, 1.0)`:
     * En lärhastighet på `0.0` eller mindre kan aldrig förbättra modellen.
@@ -164,7 +181,7 @@ Implementera metoden `train()` i `source/ml/lin_reg/fixed.cpp`:
 
 ---
 
-### 12. Optimering
+### 14. Optimering
 Implementera metoden `optimize()` i `source/ml/lin_reg/fixed.cpp`:
 * Om `input == 0`: sätt `myBias = output` direkt och returnera, utan att röra `myWeight`. Eftersom `y = k * 0 + m = m` *är* referensvärdet biasvärdet, och inget värde på `k` påverkar en prediktion gjord med indatan noll.
 * Annars:
@@ -176,7 +193,7 @@ Implementera metoden `optimize()` i `source/ml/lin_reg/fixed.cpp`:
 
 ---
 
-### 13. Kompilering och test
+### 15. Kompilering och test
 Kompilera programmet och se till att du får följande utskrift:
 
 ```
