@@ -70,8 +70,22 @@ I namnrymden `ml::dense_layer`, implementera en underklass döpt `Stub` som ärv
 publikt arv. Klassen ska markeras `final`. Stubben genomför ingen riktig beräkning; den finns 
 enbart för att annan kod ska gå att kompilera, testköra och enhetstesta mot ett riktigt 
 `dense_layer::Interface` innan en skarp `Dense`-implementation finns (se **L08–L09**). Nätverket 
-ni bygger i avsnitt 4 nedan testas i sin helhet mot denna stubb, så det är värt att få den rätt.
+ni bygger i avsnitt 4-8 nedan testas i sin helhet mot denna stubb, så det är värt att få den rätt.
 
+Lägg till privata medlemsvariabler för utdatan, felet, vikterna samt feedforward-räknaren.
+
+Antalet noder och antalet vikter per nod behöver inga egna medlemsvariabler. Båda går att läsa ur 
+de vektorer ni redan har: `nodeCount()` är utdatavektorns storlek, och `weightCount()` är 
+viktmatrisens bredd.
+
+Bias behöver ingen alls. Den ingår inte i `Interface`, och denna stubb optimerar aldrig 
+någonting, så det skulle inte finnas något att lägga i den och inget sätt att läsa ut den igen.
+
+**OBS!** Att utelämna den är en förenkling som bara gäller stubben. Det skarpa `Dense`-lagret ni 
+skriver i **L08–L09** behöver en biasvektor: den är en träningsbar parameter som justeras 
+tillsammans med vikterna vid varje anrop till `optimize()`.
+
+Klassen ska inneha följande publika metoder:
 * **`Stub()`:**
     * Klassens enda implementerade konstruktor.
     * Ska ha följande ingående argument:
@@ -118,7 +132,7 @@ ni bygger i avsnitt 4 nedan testas i sin helhet mot denna stubb, så det är vä
         * Nätverket lagrar sina lager som referenser, så ett anrop till `setOutput()` på det 
           lager nätverket byggdes med ändrar vad nätverket predikterar.
         * Det avslöjar om nätverket läser sitt utgångslager direkt eller har sparat en egen 
-          kopia av utdatan. Just den kopian är vad noteringen i avsnitt 7 nedan är till för att 
+          kopia av utdatan. Just den kopian är vad noteringen i avsnitt 9 nedan är till för att 
           förhindra.
 * **`feedforwardCount()`** samt **`clearFeedforwardCount()`:**
     * `feedforwardCount()` returnerar antalet gånger `feedforward()` har anropats på detta 
@@ -140,19 +154,6 @@ ni bygger i avsnitt 4 nedan testas i sin helhet mot denna stubb, så det är vä
 För denna klass ska default-konstruktorn samt copy- och move-konstruktorerna (och tillhörande 
 operatorer) raderas.
 
-Lägg till privata medlemsvariabler för utdatan, felet, vikterna samt feedforward-räknaren.
-
-Antalet noder och antalet vikter per nod behöver inga egna medlemsvariabler. Båda går att läsa ur 
-de vektorer ni redan har: `nodeCount()` är utdatavektorns storlek, och `weightCount()` är 
-viktmatrisens bredd.
-
-Bias behöver ingen alls. Den ingår inte i `Interface`, och denna stubb optimerar aldrig 
-någonting, så det skulle inte finnas något att lägga i den och inget sätt att läsa ut den igen.
-
-**OBS!** Att utelämna den är en förenkling som bara gäller stubben. Det skarpa `Dense`-lagret ni 
-skriver i **L08–L09** behöver en biasvektor: den är en träningsbar parameter som justeras 
-tillsammans med vikterna vid varje anrop till `optimize()`.
-
 ---
 
 ### 3. Interface för neurala nätverk
@@ -168,17 +169,51 @@ I denna namnrymd, implementera ett interface döpt `Interface`:
 ---
 
 ### 4. Klassen Shallow - deklaration
-I headerfilen `ml/neural_network/shallow.h`, lägg till namnrymden `ml::neural_network`. 
-Implementera en underklass döpt `Shallow` som ärver `Interface` via publikt arv. Klassen ska 
-markeras `final`.
+I headerfilen `ml/neural_network/shallow.h`, lägg till namnrymden `ml::neural_network`. Utgå från 
+interfacet och gör om det till en underklass:
+1. Kopiera in innehållet från `interface.h`, inklusive `#pragma once` samt namnrymden.
+2. Inkludera `ml/neural_network/interface.h`, så att basklassen är känd.
+3. Döp om klassen till `Shallow` och låt den ärva `Interface` via publikt arv. Klassen ska markeras 
+   `final`.
+4. Ta bort `virtual` samt `= 0` från metoderna; markera dem `override` i stället.
 
+Efter omvandlingen ska klassen inneha följande publika metoder:
+* **`~Shallow()`:** Ska markeras `default`, `noexcept` samt `override`.
+* **`predict()`:** Överlagring av motsvarande metod i interfacet. Ska markeras `noexcept` samt 
+  `override`.
+
+---
+
+### 5. Privata medlemsvariabler
+Lägg till följande privata medlemsvariabler i `Shallow`:
+* **`myHiddenLayer`:** Referens till nätverkets dolda lager, erhålles via konstruktorn.
+* **`myOutputLayer`:** Referens till nätverkets utgångslager, erhålles via konstruktorn.
+* **`myTrainInput`:** Referens till träningsdatans indata, erhålles via konstruktorn.
+* **`myTrainOutput`:** Referens till träningsdatans utdata, erhålles via konstruktorn.
+* **`myTrainSetCount`:** Konstant osignerat heltal som anger antalet fullständiga träningsuppsättningar (dvs. det minsta av `myTrainInput.size()` och `myTrainOutput.size()`).
+
+Medlemsvariablerna läggs till före konstruktorn, så att ni vet exakt vad konstruktorn ska initiera.
+
+---
+
+### 6. Konstruktor - deklaration
+Lägg till klassens enda implementerade konstruktor som publik metod:
 * **`Shallow()`:** Tar emot `hiddenLayer` samt `outputLayer` (nätverkets dolda lager respektive 
   utgångslager, `ml::dense_layer::Interface&`), samt `trainInput` och `trainOutput` 
   (skrivskyddade, tvådimensionella flyttalsvektorer med träningsdatans in- och utdata). Ska 
   markeras `explicit` samt `noexcept`.
-* **`~Shallow()`:** Ska markeras `default`, `noexcept` samt `override`.
-* **`predict()`:** Överlagring av motsvarande metod i interfacet. Ska markeras `noexcept` samt 
-  `override`.
+
+Konstruktorn deklareras enbart här; den implementeras i uppgift 9.
+
+---
+
+### 7. Borttagna konstruktorer och operatorer
+Radera klassens default-konstruktor, kopierings- och förflyttningskonstruktorer samt tillhörande operatorer.
+
+---
+
+### 8. Övriga metoder - deklaration
+Lägg till följande publika metod i `Shallow`:
 * **`train(epochCount, learningRate = 0.01)`:** Tränar nätverket (implementeras i sin helhet i 
   **L07**). `epochCount`: antal epoker att träna (osignerat heltal). `learningRate`: lärhastighet 
   (flyttal). Returnerar `true` om träning genomfördes, annars `false`. Ska markeras `noexcept`.
@@ -187,22 +222,7 @@ Ni får gärna lägga till fler (privata) metoder vid behov.
 
 ---
 
-### 5. Borttagna konstruktorer och operatorer
-Radera klassens default-konstruktor, kopierings- och förflyttningskonstruktorer samt tillhörande operatorer.
-
----
-
-### 6. Privata medlemsvariabler
-Lägg till följande privata medlemsvariabler i `Shallow`:
-* **`myHiddenLayer`:** Referens till nätverkets dolda lager, erhålles via konstruktorn.
-* **`myOutputLayer`:** Referens till nätverkets utgångslager, erhålles via konstruktorn.
-* **`myTrainInput`:** Referens till träningsdatans indata, erhålles via konstruktorn.
-* **`myTrainOutput`:** Referens till träningsdatans utdata, erhålles via konstruktorn.
-* **`myTrainSetCount`:** Konstant osignerat heltal som anger antalet fullständiga träningsuppsättningar (dvs. det minsta av `myTrainInput.size()` och `myTrainOutput.size()`).
-
----
-
-### 7. Konstruktor och prediktion
+### 9. Konstruktor och prediktion
 Implementera följande i `source/neural_network/shallow.cpp`:
 
 **Konstruktorn:**
@@ -216,12 +236,12 @@ Implementera följande i `source/neural_network/shallow.cpp`:
 
 ---
 
-### 8. Träningsmetod (placeholder)
+### 10. Träningsmetod (placeholder)
 Implementera en tillfällig version av `train()` i `source/neural_network/shallow.cpp` som enbart returnerar `true`. Den fullständiga implementationen (feedforward, backpropagation samt optimering för varje träningsuppsättning och epok) genomförs under **L07**.
 
 ---
 
-### 9. Kompilering och test
+### 11. Kompilering och test
 Skriv en `main`-funktion i `main.cpp` som:
 * Skapar en `ml::dense_layer::Stub`-instans för det dolda lagret samt en för utgångslagret (t.ex. 3 noder/2 vikter per nod respektive 1 nod/3 vikter per nod - antalet vikter i utgångslagret ska matcha antalet noder i det dolda lagret).
 * Skapar en `ml::neural_network::Shallow`-instans utifrån dessa två lager samt valfri träningsdata (t.ex. ett 2-bitars XOR-mönster).
