@@ -183,13 +183,13 @@ Implementera metoden `train()` i `source/ml/lin_reg/fixed.cpp`:
 
 ### 14. Optimering
 Implementera metoden `optimize()` i `source/ml/lin_reg/fixed.cpp`:
-* Om `input == 0`: sätt `myBias = output` direkt och returnera, utan att röra `myWeight`. Eftersom `y = k * 0 + m = m` *är* referensvärdet biasvärdet, och inget värde på `k` påverkar en prediktion gjord med indatan noll.
-* Annars:
-    * Beräkna en prediktion med given indata: `prediction = myWeight * input + myBias`.
-    * Beräkna felet som differensen mellan referensvärdet och prediktionen: `error = output - prediction`.
-    * Justera modellens parametrar utefter felet:
-        * `myBias   = myBias   + error * learningRate`
-        * `myWeight = myWeight + error * learningRate * input`
+* Beräkna en prediktion med given indata: `prediction = myWeight * input + myBias`.
+* Beräkna felet som differensen mellan referensvärdet och prediktionen: `error = output - prediction`.
+* Justera modellens parametrar utefter felet:
+    * `myBias   = myBias   + error * learningRate`
+    * `myWeight = myWeight + error * learningRate * input`
+
+Specialfallet då indatan är noll behandlas i **L03**.
 
 ---
 

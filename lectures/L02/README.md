@@ -21,6 +21,7 @@
 * Genomför tillhörande övningsuppgifter i [bilaga B](./appendix/b_exercises.md).
     * Ni får tid på er att genomföra uppgifterna enskilt.
     * Uppgifterna gås sedan igenom i helklass.
+    * Lösningsförslag finns i [exercises](./exercises).
 
 ---
 
@@ -32,6 +33,7 @@
 ---
 
 ## Nästa lektion
+* Optimering då indatan är noll.
 * Vidare implementering av regressionsmodeller i mjukvara: Randomisering av träningsordningen.
 * **P03**-start: Adaptiv linjär regressionsmodell i ett inbyggt system.
 
