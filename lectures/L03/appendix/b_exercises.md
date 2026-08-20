@@ -1,14 +1,23 @@
 # Bilaga B - Övningsuppgifter
-Ni ska bygga ut klassen `ml::lin_reg::Fixed` från L02 med randomiserad träningsordning.
+Ni ska bygga ut klassen `ml::lin_reg::Fixed` från L02 med hantering av indatan noll samt randomiserad träningsordning.
 
 ---
 
-### 1. MatrixU32-alias
+### 1. Optimering då indatan är noll
+Uppdatera metoden `optimize()` i `source/ml/lin_reg/fixed.cpp` så att indatan noll hanteras som ett specialfall:
+* Om `input == 0`: sätt `myBias = output` direkt och returnera, utan att röra `myWeight`.
+* Annars: genomför optimeringen precis som i **L02**.
+
+Med indatan noll gäller `y = k * 0 + m = m`; referensvärdet *är* alltså biasvärdet, och inget värde på `k` påverkar en prediktion gjord med indatan noll. Modellen kan därför sätta biasvärdet direkt i stället för att närma sig det stegvis, och viktvärdet lämnas orört, eftersom korrigeringen `error * learningRate * input` ändå blir noll.
+
+---
+
+### 2. MatrixU32-alias
 Lägg till aliaset `MatrixU32` i headerfilen `ml/types.h` som ett substitut för `std::vector<std::uint32_t>`, i namnrymden `ml`.
 
 ---
 
-### 2. Slumptalsgenerator
+### 3. Slumptalsgenerator
 Lägg till en funktion döpt `initRandom()` i en anonym namnrymd i `source/ml/lin_reg/fixed.cpp`. Funktionen ska initiera slumptalsgeneratorn en enda gång vid anrop:
 * Använd en statisk lokal variabel döpt `initialized` (av typen `bool`, initierad till `false`) för att hålla koll på om generatorn redan har initierats.
 * Initiera generatorn med `std::srand(std::time(nullptr))`.
@@ -18,7 +27,7 @@ Lägg till en funktion döpt `initRandom()` i en anonym namnrymd i `source/ml/li
 
 ---
 
-### 3. Träningsordning
+### 4. Träningsordning
 Lägg till en privat medlemsvariabel döpt `myTrainOrder` i `Fixed`:
 * Ska innehålla indexen för träningsuppsättningarna som osignerade heltal (`ml::MatrixU32`).
 * Initieras i konstruktorn med indexen `0, 1, 2 ... N-1`, där `N` är antalet träningsuppsättningar.
@@ -31,7 +40,7 @@ Uppdatera konstruktorn i `source/ml/lin_reg/fixed.cpp`:
 
 ---
 
-### 4. Shuffling
+### 5. Shuffling
 Lägg till en privat metod döpt `shuffle()` i `Fixed`:
 * Ska blanda innehållet i `myTrainOrder` i slumpvis ordning.
 * För varje index `i`, välj ett slumpmässigt index `r` och byt plats på `myTrainOrder[i]` och `myTrainOrder[r]`.
@@ -39,7 +48,7 @@ Lägg till en privat metod döpt `shuffle()` i `Fixed`:
 
 ---
 
-### 5. Uppdatera träningsmetoden
+### 6. Uppdatera träningsmetoden
 Uppdatera metoden `train()` i `source/ml/lin_reg/fixed.cpp`:
 * Anropa `initRandom()` i början av metoden.
 * Anropa `shuffle(myTrainOrder)` i början av varje epok.
@@ -47,7 +56,7 @@ Uppdatera metoden `train()` i `source/ml/lin_reg/fixed.cpp`:
 
 ---
 
-### 6. Kompilering och test
+### 7. Kompilering och test
 Kompilera och testkör programmet. Träningsordningen ska nu vara slumpmässig varje epok, men det predikterade resultatet ska fortfarande stämma överens med träningsdatan efter genomförd träning.
 
 ---

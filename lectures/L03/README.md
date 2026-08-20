@@ -1,12 +1,14 @@
 # L03 - P03 (del I)
 
 ## Dagordning
+* Optimering då indatan är noll (kvar från **L02**).
 * Vidare implementering av regressionsmodeller i mjukvara: Randomisering av träningsordningen.
 * **P03**-start: Adaptiv linjär regressionsmodell i ett inbyggt system.
 
 ---
 
 ## Mål med lektionen
+* Kunna hantera specialfallet då indatan är noll vid optimering.
 * Kunna randomisera ordningsföljden på träningsuppsättningarna inför varje ny epok.
 * Påbörja **P03**: skapa grundstruktur och påbörja implementation av `ml::lin_reg::Adaptive`.
 
