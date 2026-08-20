@@ -29,6 +29,7 @@
 * Genomför tillhörande övningsuppgifter i [bilaga C](./appendix/c_exercises.md):
     * Ni får tid på er att genomföra uppgifterna enskilt.
     * Uppgifterna gås sedan igenom i helklass.
+    * Lösningsförslag finns i [bilaga D](./appendix/d_solutions.md).
 
 ---
 

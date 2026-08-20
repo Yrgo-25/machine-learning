@@ -42,12 +42,14 @@ std::vector<std::uint8_t> v3(100U, 5U);
 | `erase(it)` | Raderar elementet på iterator `it` |
 
 ### Iteration
+I exemplen nedan antas `values` vara en flyttalsvektor (`std::vector<double>`). Utskrift sker via `std::printf()` från `<cstdio>`, där formatspecifieraren `%g` används för flyttal.
+
 * Iteration via range-baserad for-loop (rekommenderas):
 
 ```cpp
 for (const auto& val : values)
 {         
-    std::cout << val << "\n";
+    std::printf("%g\n", val);
 }
 ```
 
@@ -56,7 +58,7 @@ for (const auto& val : values)
 ```cpp
 for (std::size_t i{}; i < values.size(); ++i) 
 {
-    std::cout << values[i] << "\n";
+    std::printf("%g\n", values[i]);
 }
 ```
 
@@ -65,7 +67,7 @@ for (std::size_t i{}; i < values.size(); ++i)
 ```cpp
 for (auto it = values.begin(); it != values.end(); ++it)
 {
-    std::cout << *it << "\n";
+    std::printf("%g\n", *it);
 }
 ```
 
