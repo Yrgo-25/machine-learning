@@ -88,7 +88,7 @@ Stäm av vald algoritm, uppgift och dataset med läraren innan ni börjar implem
 
 ### Enhetstester
 * Er implementation av ML-algoritmen (och gärna även `ml::lin_reg::Adaptive` från Fas 1) ska ha enhetstester som verifierar centrala delar, t.ex. beräkningar i enskilda lager/steg, träningens konvergens och rimliga gränsfall.
-* Välj ett lämpligt C++-testramverk (t.ex. Catch2, GoogleTest eller Unity) och motivera valet kort i `p01_rapport.md`.
+* Använd kursens testramverk `yrgo::test` ([yrgo-test](https://github.com/yrgo-libs/yrgo-test.git)), som med fördel läggs till som en git-submodul i repot. Samma ramverk används i **P04**, så era ML-tester och era övriga tester hamnar i samma testsvit och kan köras med ett och samma kommando.
 * Testerna behöver inte köras på målhårdvaran – det är fullt tillräckligt att köra dem på värddatorn.
 
 ### Användning av AI-verktyg
@@ -96,7 +96,7 @@ Ni får använda Claude (eller motsvarande AI-verktyg) till:
 * att skriva enhetstester,
 * att sätta upp repot/projektet (t.ex. build-konfiguration, mappstruktur, CI).
 
-Ni får **inte** använda AI för att skriva själva ML-implementationen (algoritmen i Fas 1 eller er valda algoritm i Fas 2) – den koden ska vara skriven av gruppen för hand. Ange tydligt i `p01_rapport.md` var och hur AI-verktyg har använts.
+Ni får **inte** använda AI för att skriva själva ML-implementationen (algoritmen i Fas 1 eller er valda algoritm i Fas 2) – den koden ska vara skriven av gruppen för hand. Ange tydligt i `p03_report.md` var och hur AI-verktyg har använts.
 
 ---
 
@@ -114,7 +114,7 @@ Ni får **inte** använda AI för att skriva själva ML-implementationen (algori
   [Bedömning](#bedömning)).
 
 ### Bidragsrapport (obligatorisk)
-Ni lämnar in en gemensam bidragsrapport i filen `p01_rapport.md` där ni övergripande beskriver vem som gjorde vad, vilken algoritm och uppgift ni valde till Fas 2, samt var AI-verktyg har använts. Utvärderingsfrågorna besvaras i samma fil (se [Utvärdering](#utvärdering)).
+Ni lämnar in en gemensam bidragsrapport i filen `p03_report.md` där ni övergripande beskriver vem som gjorde vad, vilken algoritm och uppgift ni valde till Fas 2, samt var AI-verktyg har använts. Utvärderingsfrågorna besvaras i samma fil (se [Utvärdering](#utvärdering)).
 
 ---
 
@@ -161,7 +161,7 @@ Projektet redovisas för lärare under lektionstid:
 ---
 
 ## Utvärdering
-Besvara följande frågor gemensamt i `p01_rapport.md`, tillsammans med bidragsrapporten:
+Besvara följande frågor gemensamt i `p03_report.md`, tillsammans med bidragsrapporten:
 1. Varför ärver `driver::tempsensor::Smart` interfacet i stället för att ersätta `Tmp36` direkt?
 2. Vad är fördelen med att träna modellen vid systemstart i stället för att hårdkoda temperaturformeln?
 3. Hur påverkar lärhastigheten träningsförloppet och varför är en adaptiv lärhastighet fördelaktig?
