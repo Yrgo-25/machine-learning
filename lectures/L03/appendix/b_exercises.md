@@ -25,6 +25,8 @@ Lägg till en funktion döpt `initRandom()` i en anonym namnrymd i `source/ml/li
 * Inkludera `<cstdlib>` och `<ctime>` i `fixed.cpp`.
 * Ska markeras `noexcept`.
 
+Funktionen ska anropas antingen i konstruktorn eller i början av metoden `train()`; eftersom den bara initierar generatorn vid första anropet fungerar båda placeringarna lika bra.
+
 ---
 
 ### 4. Träningsordning
@@ -37,6 +39,7 @@ Medlemsvariabeln `mySetCount` från **L02** kan nu tas bort: `myTrainOrder` inne
 Uppdatera konstruktorn i `source/ml/lin_reg/fixed.cpp`:
 * Skriv ut ett felmeddelande och anropa `std::terminate()` om antalet träningsuppsättningar är 0, precis som i **L02**.
 * Sätt storleken på `myTrainOrder` till antalet träningsuppsättningar och fyll den med indexen `0, 1, 2 ... N-1`.
+* Anropa `initRandom()`, om anropet inte i stället sker i början av `train()` enligt uppgift 6.
 
 ---
 
@@ -50,7 +53,7 @@ Lägg till en privat metod döpt `shuffle()` i `Fixed`:
 
 ### 6. Uppdatera träningsmetoden
 Uppdatera metoden `train()` i `source/ml/lin_reg/fixed.cpp`:
-* Anropa `initRandom()` i början av metoden.
+* Anropa `initRandom()` i början av metoden, om anropet inte redan sker i konstruktorn enligt uppgift 4.
 * Anropa `shuffle(myTrainOrder)` i början av varje epok.
 * Iterera genom träningsuppsättningarna i den ordning som `myTrainOrder` anger i stället för sekventiellt via index, exempelvis med en range-baserad for-loop över `myTrainOrder`. Observera att loopvariabeln nu är indexet in i träningsdatan, inte räknaren i sig.
 
