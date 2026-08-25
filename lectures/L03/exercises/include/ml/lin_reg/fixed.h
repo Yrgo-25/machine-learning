@@ -70,14 +70,19 @@ private:
      */
     void optimize(double input, double output, double learningRate) noexcept;
 
+    /**
+     * @brief Shuffle training order index list.
+     */
+    void shuffle() noexcept;
+
+    /** Matrix holding the training order via index. */
+    MatrixU32 myTrainOrder;
+
     /** Matrix holding training inputs. */
     const Matrix1d& myTrainIn;
 
     /** Matrix holding training outputs. */
     const Matrix1d& myTrainOut;
-
-    /** Number of complete training sets. */
-    const std::size_t mySetCount;
 
     /** Bias value (m). */
     double myBias;

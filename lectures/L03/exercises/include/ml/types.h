@@ -3,6 +3,7 @@
  */
 #pragma once
 
+#include <cstdint>
 #include <vector>
 
 namespace ml
@@ -15,5 +16,8 @@ using Matrix2d = std::vector<Matrix1d>;
 
 /** Three-dimensional matrix. */
 using Matrix3d = std::vector<Matrix2d>;
+
+/** Matrix holding unsigned integers. */
+using MatrixU32 = std::vector<std::uint32_t>;
 
 } // namespace ml

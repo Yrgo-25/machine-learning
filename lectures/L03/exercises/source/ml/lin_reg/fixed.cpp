@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdio>
+#include <cstdlib>
+#include <ctime>
 #include <exception>
 
 #include "ml/lin_reg/fixed.h"
@@ -11,19 +13,47 @@
 
 namespace ml::lin_reg
 {
+namespace
+{
+// -----------------------------------------------------------------------------
+void initRandom() noexcept
+{
+    // Only initialize the random generator once.
+    static bool initialized{false};
+    if (initialized) { return; }
+
+    // Initialize the random generator with the current timestamp as seed.
+    std::srand(std::time(nullptr));
+    initialized = true;
+}
+} // namespace
+
 // -----------------------------------------------------------------------------
 Fixed::Fixed(const Matrix1d& trainIn, const Matrix1d& trainOut) noexcept
-    : myTrainIn{trainIn}
+    : myTrainOrder{}
+    , myTrainIn{trainIn}
     , myTrainOut{trainOut}
-    , mySetCount{std::min(trainIn.size(), trainOut.size())}
     , myBias{}
     , myWeight{}
 {
-    if (0U == mySetCount)
+    const auto setCount = std::min(trainIn.size(), trainOut.size());
+
+    if (0U == setCount)
     {
         std::fprintf(stderr, "Cannot create regression model without training data!\n");
         std::terminate();
     }
+
+    // Initialize training order vector with indexes of the training sets.
+    myTrainOrder.resize(setCount);
+
+    for (std::uint32_t i{}; i < setCount; ++i)
+    {
+        myTrainOrder[i] = i;
+    }
+
+    // Initialize random generator (occurs only once).
+    initRandom();
 }
 
 // -----------------------------------------------------------------------------
@@ -40,7 +70,9 @@ bool Fixed::train(std::size_t epochCount, double learningRate) noexcept
 
     for (std::size_t epoch{}; epoch < epochCount; ++epoch)
     {
-        for (std::size_t i{}; i < mySetCount; ++i)
+        shuffle();
+
+        for (const auto i : myTrainOrder)
         {
             const auto input  = myTrainIn[i];
             const auto output = myTrainOut[i];
@@ -51,18 +83,31 @@ bool Fixed::train(std::size_t epochCount, double learningRate) noexcept
 }
 
 // -----------------------------------------------------------------------------
-void Fixed::optimize(double input, double output, double learningRate) noexcept
+void Fixed::optimize(const double input, const double output, const double learningRate) noexcept
 {
-    // yp = kx + m.
-    const auto prediction = predict(input);
+    // m == yref if x == 0.
+    if (0.0 == input)
+    {
+        myBias = output;
+        return;
+    }
 
-    // e  = yref - yp.
-    const auto error = output - prediction;
+    const auto prediction = predict(input);      // yp = kx + m.
+    const auto error      = output - prediction; // e  = yref - yp.
+    myBias += error * learningRate;              // m  = m + e * LR
+    myWeight += error * learningRate * input;    // k  = k + e * LR * x
+}
 
-    // m  = m + e * LR
-    myBias += error * learningRate;
-
-    // k  = k + e * LR * x
-    myWeight += error * learningRate * input;
+// -----------------------------------------------------------------------------
+void Fixed::shuffle() noexcept
+{
+    // Iterate through all training sets, swap each index i with a random index r.
+    for (std::size_t i{}; i < myTrainOrder.size(); ++i)
+    {
+        const auto r    = std::rand() % myTrainOrder.size();
+        const auto temp = myTrainOrder[i];
+        myTrainOrder[i] = myTrainOrder[r];
+        myTrainOrder[r] = temp;
+    }
 }
 } // namespace ml::lin_reg
