@@ -3,6 +3,9 @@
 !*.*
 !*/
 
+# Ignore Windows Zone.Identifier
+*:Zone.Identifier
+
 # Don't ignore makefiles and license files.
 !makefile
 !Makefile
