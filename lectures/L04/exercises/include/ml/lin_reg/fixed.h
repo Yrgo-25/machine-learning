@@ -49,10 +49,13 @@ public:
      *
      * @param[in] epochCount Number of epochs to train the model. Must be greater than 0.
      * @param[in] learningRate Learning rate to use. Must be in range (0.0, 1.0), non-inclusive.
+     * @param[in] precisionThreshold Precision threshold. Training is aborted if/when this
+     *                               threshold is reached.
      *
      * @return True if training was performed, false if input argument is invalid.
      */
-    bool train(std::size_t epochCount, double learningRate = 0.01) noexcept;
+    bool train(std::size_t epochCount, double learningRate = 0.01,
+               double precisionThreshold = 0.999999) noexcept;
 
     Fixed()                        = delete; // No default constructor.
     Fixed(const Fixed&)            = delete; // No copy constructor.
@@ -74,6 +77,13 @@ private:
      * @brief Shuffle training order index list.
      */
     void shuffle() noexcept;
+
+    /**
+     * @brief Compute precision.
+     *
+     * @return Precision as a floating-point value.
+     */
+    [[nodiscard]] double computePrecision() const noexcept;
 
     /** Matrix holding the training order via index. */
     MatrixU32 myTrainOrder;

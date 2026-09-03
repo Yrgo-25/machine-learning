@@ -29,7 +29,7 @@ void testModel(const ml::lin_reg::Interface& model, const ml::Matrix1d& inputs) 
  */
 int main()
 {
-    constexpr std::size_t epochCount{20U};
+    constexpr std::size_t epochCount{1000U};
     constexpr double learningRate{0.23};
 
     // Set up linear regression model predicting y = 2x + 2.

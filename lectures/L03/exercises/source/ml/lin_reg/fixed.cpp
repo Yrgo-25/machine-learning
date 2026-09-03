@@ -2,6 +2,7 @@
  * @file Linear regression model with fixed learning rate.
  */
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <cstdio>
 #include <cstdlib>
