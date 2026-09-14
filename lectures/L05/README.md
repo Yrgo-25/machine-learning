@@ -22,7 +22,7 @@
 * Träning av neurala nätverk för hand behandlas under lektionen.
 
 ### Efter lektionen
-* Genomför det första träningsexemplet i [bilaga B](./appendix/b_exercises.md). Lösningsförslag är bifogat.
+* Genomför det första träningsexemplet i [bilaga B](./appendix/b_exercises.md). Lösningsförslag finns [här](./appendix/c_solutions.md).
 
 ---
 
