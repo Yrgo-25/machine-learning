@@ -4,9 +4,16 @@ implementerar detta interface. Nätverket som använder lagren byggs under **L07
 
 ---
 
-### 1. Katalogstruktur
-Katalogen [`exercises`](../exercises) innehåller en färdig katalogstruktur med tomma headerfiler 
-för interfacet och stubbklassen, samt en testsvit i `exercises/test` (se avsnitt 5). Skriv er kod 
+### 1. Kom igång
+Hämta först testramverket, som ligger i git-submodulen `libs/test`. Kör följande kommando en gång,
+i repots rotkatalog:
+
+```bash
+git submodule update --init --recursive
+```
+
+Katalogen [`exercises`](../exercises) innehåller en färdig katalogstruktur med tomma headerfiler
+för interfacet och stubbklassen, samt en testsvit i `exercises/test` (se avsnitt 5). Skriv er kod
 där, eller bygg ut katalogstrukturen i er befintliga `ml`-kodbas enligt nedan:
 
 ```
@@ -22,146 +29,114 @@ ml/
 └── Makefile
 ```
 
-Både interfacet och stubbklassen implementeras direkt i sina headerfiler, så makefilen behöver 
+Både interfacet och stubbklassen implementeras direkt i sina headerfiler, så makefilen behöver
 inte uppdateras under denna lektion.
 
 ---
 
 ### 2. Dense-lagrets interface
-Det dolda lagret samt utgångslagret representeras av interfacet `ml::dense_layer::Interface`. 
-En skarp implementation skapas först under **L08–L09**. Fram tills dess implementerar ni en enkel 
+Det dolda lagret samt utgångslagret representeras av interfacet `ml::dense_layer::Interface`.
+En skarp implementation skapas först under **L08–L09**. Fram tills dess implementerar ni en enkel
 stubbklass `ml::dense_layer::Stub` som placeholder, se avsnitt 3 nedan.
 
-I headerfilen `ml/dense_layer/interface.h`, lägg till namnrymden `ml::dense_layer`. I denna 
-namnrymd, implementera ett interface döpt `Interface`. Samtliga metoder (förutom destruktorn) ska 
-deklareras som rent virtuella (`= 0`).
+I headerfilen `ml/dense_layer/interface.h`, implementera klassen `Interface` i namnrymden
+`ml::dense_layer`. Tabellerna nedan använder följande typer från `ml/types.h`. Inuti namnrymden
+`ml::dense_layer` räcker det att skriva `Matrix1d` respektive `Matrix2d`:
 
-* **`~Interface()`:** Ska sättas till `default` samt markeras `virtual` och `noexcept`.
+| Typ | Definition | Innehåll |
+|---|---|---|
+| `ml::Matrix1d` | `std::vector<double>` | En vektor av flyttal, t.ex. ett lagers utdata, fel eller indata. |
+| `ml::Matrix2d` | `std::vector<ml::Matrix1d>` | Ett lagers vikter: en rad per nod och en kolumn per vikt. |
 
-Getters, samtliga `const`, `noexcept` samt `[[nodiscard]]`:
+Samtliga metoder utom destruktorn ska deklareras som rent virtuella (`= 0`):
 
-| Metod | Returnerar |
-|---|---|
-| `nodeCount()` | Antal noder i lagret (`std::size_t`). |
-| `weightCount()` | Antal vikter per nod (`std::size_t`). |
-| `output()` | Referens till lagrets utdata (skrivskyddad flyttalsvektor). |
-| `error()` | Referens till lagrets fel (skrivskyddad flyttalsvektor). |
-| `weights()` | Referens till lagrets vikter (skrivskyddad, tvådimensionell flyttalsvektor). |
+| Metod | Ingående argument | Returtyp | Markeras | Beskrivning |
+|---|---|---|---|---|
+| `~Interface()` | - | - | `virtual`, `noexcept`, `= default` | Destruktor. |
+| `nodeCount()` | - | `std::size_t` | `[[nodiscard]]`, `const`, `noexcept` | Antal noder i lagret. |
+| `weightCount()` | - | `std::size_t` | `[[nodiscard]]`, `const`, `noexcept` | Antal vikter per nod. |
+| `output()` | - | `const Matrix1d&` | `[[nodiscard]]`, `const`, `noexcept` | Lagrets utdata. |
+| `error()` | - | `const Matrix1d&` | `[[nodiscard]]`, `const`, `noexcept` | Lagrets fel. |
+| `weights()` | - | `const Matrix2d&` | `[[nodiscard]]`, `const`, `noexcept` | Lagrets vikter. |
+| `feedforward()` | `const Matrix1d& input` | `bool` | `noexcept` | Genomför feedforward med indatan `input`. |
+| `backpropagate()` | `const Matrix1d& reference` | `bool` | `noexcept` | Utgångslager: beräknar felet utifrån referensvärdena `reference`. |
+| `backpropagate()` | `const Interface& nextLayer` | `bool` | `noexcept` | Dolt lager: beräknar felet utifrån nästa lager, `nextLayer`. |
+| `optimize()` | `const Matrix1d& input`, `double learningRate` | `bool` | `noexcept` | Uppdaterar bias och vikter utifrån indatan `input` och lärhastigheten `learningRate`. |
 
-Beräkningsmetoder, samtliga `noexcept` och med returtypen `bool`. Var och en returnerar `false` 
-vid ogiltig indata (felaktig dimension eller ogiltig lärhastighet) och `true` annars, så att 
-anroparen själv kan avgöra vad som ska göras åt felet. Som i **L02** och **L04** är 
-`std::terminate()` reserverad för konstruktorn, som inte kan returnera någon felkod till 
-anroparen:
-* **`feedforward(input)`:** Genomför feedforward.
-    * `input`: skrivskyddad flyttalsvektor med indata.
-* **`backpropagate(output)`** (utgångslager): Beräknar fel utifrån referensvärden.
-    * `output`: skrivskyddad flyttalsvektor med referensvärden.
-* **`backpropagate(nextLayer)`** (dolt lager): Beräknar fel utifrån nästa lager.
-    * `nextLayer`: referens till nästa lager (`const Interface&`).
-* **`optimize(input, learningRate)`:** Uppdaterar bias och vikter.
-    * `input`: skrivskyddad flyttalsvektor.
-    * `learningRate`: flyttal.
+Beräkningsmetoderna (`feedforward()`, `backpropagate()` och `optimize()`) returnerar `false` vid
+ogiltig indata, dvs. felaktig dimension eller ogiltig lärhastighet, och `true` annars. Anroparen
+kan då själv avgöra vad som ska göras åt felet. Som i **L02** och **L04** är `std::terminate()`
+reserverad för konstruktorn, som inte kan returnera någon felkod till anroparen.
 
 ---
 
 ### 3. Stubbklassen
-I headerfilen `ml/dense_layer/stub.h`, lägg till namnrymden `ml::dense_layer`. I denna namnrymd, 
-implementera en underklass döpt `Stub` som ärver `Interface` via publikt arv. Klassen ska markeras 
-`final`. Stubben genomför ingen riktig beräkning; den finns enbart för att annan kod ska gå att 
-kompilera, testköra och enhetstesta mot ett riktigt `dense_layer::Interface` innan en skarp 
-`Dense`-implementation finns (se **L08–L09**). Nätverket ni bygger under **L07** testas i sin 
+Stubben genomför ingen riktig beräkning. Den finns enbart för att annan kod ska gå att kompilera,
+testköra och enhetstesta mot ett riktigt `dense_layer::Interface` innan en skarp
+`Dense`-implementation finns (se **L08–L09**). Nätverket ni bygger under **L07** testas i sin
 helhet mot denna stubb, så det är värt att få den rätt.
 
-Lägg till privata medlemsvariabler för utdatan, felet, vikterna samt feedforward-räknaren.
+I headerfilen `ml/dense_layer/stub.h`, implementera klassen `Stub` i namnrymden
+`ml::dense_layer`. Klassen ärver `Interface` via publikt arv och markeras `final`.
 
-Antalet noder och antalet vikter per nod behöver inga egna medlemsvariabler. Båda går att läsa ur 
-de vektorer ni redan har: `nodeCount()` är utdatavektorns storlek, och `weightCount()` är 
-viktmatrisens bredd.
+Klassen ska inneha följande privata medlemsvariabler:
 
-Bias behöver ingen alls. Den ingår inte i `Interface`, och denna stubb optimerar aldrig 
-någonting, så det skulle inte finnas något att lägga i den och inget sätt att läsa ut den igen.
-
-**OBS!** Att utelämna den är en förenkling som bara gäller stubben. Det skarpa `Dense`-lagret ni 
-skriver i **L08–L09** behöver en biasvektor: den är en träningsbar parameter som justeras 
-tillsammans med vikterna vid varje anrop till `optimize()`.
+| Medlemsvariabel | Typ | Innehåll |
+|---|---|---|
+| `myOutput` | `Matrix1d` | Lagrets utdata, ett element per nod. |
+| `myError` | `Matrix1d` | Lagrets fel, ett element per nod. |
+| `myWeights` | `Matrix2d` | Lagrets vikter, en rad per nod och en kolumn per vikt. |
+| `myFeedforwardCount` | `std::size_t` | Antal anrop till `feedforward()`. |
 
 Klassen ska inneha följande publika metoder:
-* **`Stub()`:**
-    * Klassens enda implementerade konstruktor.
-    * Ska ha följande ingående argument:
-        * `nodeCount`: antal noder i lagret (osignerat heltal).
-        * `weightCount`: antal vikter per nod (osignerat heltal).
-        * `outputValue`: värdet som varje element i utdatavektorn sätts till (flyttal). 
-          Defaultvärde: `0.5`.
-    * Initierar varje element i utdatavektorn till `outputValue`, samt fel- och viktvektorerna 
-      till nollor.
-    * Ska skriva ut ett felmeddelande och anropa `std::terminate()` om `nodeCount` eller 
-      `weightCount` är 0:
-        * Som i **L02** och **L04** är konstruktorn den enda plats som avslutar programmet, 
-          eftersom den inte kan returnera någon felkod.
-        * Det garanterar också minst en nod och en vikt, vilket är det som gör det säkert för 
-          `weightCount()` att läsa bredden på viktmatrisens första rad.
-    * `outputValue` är ett argument i stället för en hårdkodad konstant för att två stubbar ska 
-      gå att skilja åt. Ett nätverk vars samtliga lager rapporterar samma utdata kan inte visa 
-      om en prediktion kom från utgångslagret eller från det dolda lagret; ger man varje lager 
-      sitt eget värde blir det synligt.
-    * Ska markeras `explicit` samt `noexcept`.
-* **`~Stub()`:**
-    * Destruktor som överlagrar interfacets destruktor.
-    * Ska markeras `default`, `noexcept` samt `override`.
-* **Getters** (`nodeCount()`, `weightCount()`, `output()`, `error()`, `weights()`):
-    * Överlagrar motsvarande metoder i interfacet.
-    * Ska markeras `override` (behåller interfacets `const` och `noexcept`, men **inte** 
-      `[[nodiscard]]`).
-* **`feedforward()`**, båda varianterna av **`backpropagate()`** samt **`optimize()`**:
-    * Genomför endast range-checkar, och returnerar `true` om samtliga villkor nedan är 
-      uppfyllda, annars `false`:
 
-      | Metod | Villkor |
-      |---|---|
-      | `feedforward(input)` | `input.size() == weightCount()` |
-      | `backpropagate(output)` | `output.size() == nodeCount()` |
-      | `backpropagate(nextLayer)` | `nextLayer.weightCount() == nodeCount()` |
-      | `optimize(input, learningRate)` | `input.size() == weightCount()` samt `0.0 < learningRate < 1.0` |
+| Metod | Ingående argument | Returtyp | Markeras | Beskrivning |
+|---|---|---|---|---|
+| `Stub()` | `std::size_t nodeCount`, `std::size_t weightCount`, `double outputValue = 0.5` | - | `explicit`, `noexcept` | Konstruktor. Sätter varje element i `myOutput` till `outputValue`, samt `myError` och `myWeights` till nollor. Skriver ut ett felmeddelande och anropar `std::terminate()` om `nodeCount` eller `weightCount` är 0. |
+| `~Stub()` | - | - | `noexcept`, `override`, `= default` | Destruktor. |
+| `nodeCount()` | - | `std::size_t` | `[[nodiscard]]`, `const`, `noexcept`, `override` | Returnerar storleken på `myOutput`. |
+| `weightCount()` | - | `std::size_t` | `[[nodiscard]]`, `const`, `noexcept`, `override` | Returnerar storleken på första raden i `myWeights`. |
+| `output()` | - | `const Matrix1d&` | `[[nodiscard]]`, `const`, `noexcept`, `override` | Returnerar `myOutput`. |
+| `error()` | - | `const Matrix1d&` | `[[nodiscard]]`, `const`, `noexcept`, `override` | Returnerar `myError`. |
+| `weights()` | - | `const Matrix2d&` | `[[nodiscard]]`, `const`, `noexcept`, `override` | Returnerar `myWeights`. |
+| `feedforward()` | `const Matrix1d& input` | `bool` | `noexcept`, `override` | Ökar först `myFeedforwardCount`, oavsett indata. Returnerar sedan `true` om `input.size() == weightCount()`, annars `false`. |
+| `backpropagate()` | `const Matrix1d& reference` | `bool` | `noexcept`, `override` | Returnerar `true` om `reference.size() == nodeCount()`, annars `false`. |
+| `backpropagate()` | `const Interface& nextLayer` | `bool` | `noexcept`, `override` | Returnerar `true` om `nextLayer.weightCount() == nodeCount()`, annars `false`. |
+| `optimize()` | `const Matrix1d& input`, `double learningRate` | `bool` | `noexcept`, `override` | Returnerar `true` om `input.size() == weightCount()` samt `0.0 < learningRate < 1.0`, annars `false`. |
+| `setOutput()` | `double outputValue` | `void` | `noexcept` | Sätter varje element i `myOutput` till `outputValue`. Ingår inte i `Interface`. |
+| `feedforwardCount()` | - | `std::size_t` | `[[nodiscard]]`, `const`, `noexcept` | Returnerar `myFeedforwardCount`. Ingår inte i `Interface`. |
+| `clearFeedforwardCount()` | - | `void` | `noexcept` | Nollställer `myFeedforwardCount`. Ingår inte i `Interface`. |
 
-    * Blanda inte ihop antalet noder och antalet vikter per nod. Indatan till ett lager har ett 
-      värde per vikt, medan referensvärdena har ett värde per nod.
-    * Beräknar avsiktligt ingenting:
-        * Utdatan förblir `outputValue` oavsett vad som matas in.
-        * Felet förblir noll.
-    * Ska markeras `override` samt `noexcept`.
-* **`setOutput()`:**
-    * Sätter varje element i utdatavektorn till det angivna värdet.
-    * Ska ha ett enda ingående argument:
-        * `outputValue`: värdet som varje element i utdatavektorn ska sättas till (flyttal).
-    * Returnerar ingenting, och ska markeras `noexcept`.
-    * Ingår **inte** i `Interface`. Den finns enbart på stubben.
-    * Det är denna metod som gör det möjligt att styra utdatan för ett helt nätverk i ett test:
-        * Nätverket ni bygger under **L07** lagrar sina lager som referenser, så ett anrop till 
-          `setOutput()` på det lager nätverket byggdes med ändrar vad nätverket predikterar.
-        * Det avslöjar om nätverket läser sitt utgångslager direkt eller har sparat en egen 
-          kopia av utdatan. Just den kopian är vad noteringen om `predict()` i **L07** är till 
-          för att förhindra.
-* **`feedforwardCount()`** samt **`clearFeedforwardCount()`:**
-    * `feedforwardCount()` returnerar antalet gånger `feedforward()` har anropats på detta 
-      lager, och räknar **varje** anrop, inte bara de som klarade range-checken:
-        * Öka räknaren (`myFeedforwardCount`) allra först i `feedforward()`, innan indatans 
-          storlek kontrolleras, så att ett avvisat anrop höjer den precis som ett godkänt.
-        * Räknaren mäter hur ofta lagret *ombads* göra feedforward, inte hur ofta det gick med 
-          på det.
-        * Ska markeras `[[nodiscard]]`, `const` samt `noexcept`.
-    * `clearFeedforwardCount()` nollställer räknaren.
-        * Returnerar ingenting, och ska markeras `noexcept`.
-    * Ingen av dem ingår i `Interface`.
-    * `train()` i **L07** genomför en feedforward per träningsuppsättning och epok, så det är 
-      detta som gör träningsloopen möjlig att fastställa i ett test:
-        * Inget annat kan göra det: en loop som kör ett enda pass i stället för samtliga epoker 
-          stämmer fortfarande dimensionsmässigt och returnerar fortfarande `true`, så utan en 
-          räknare går den inte att skilja från en korrekt loop.
+Radera default-konstruktorn, copy- och move-konstruktorerna samt tillhörande
+tilldelningsoperatorer (`= delete`).
 
-För denna klass ska default-konstruktorn samt copy- och move-konstruktorerna (och tillhörande 
-operatorer) raderas.
+#### Att tänka på
+* **Beräkningsmetoderna beräknar avsiktligt ingenting.** De genomför endast range-checkarna i
+  tabellen ovan: utdatan förblir `outputValue` oavsett vad som matas in, och felet förblir noll.
+* **Blanda inte ihop noder och vikter.** Indatan till ett lager har ett värde per vikt, medan
+  referensvärdena har ett värde per nod.
+* **Antalet noder och vikter behöver inga egna medlemsvariabler.** Båda går att läsa ur
+  vektorerna ni redan har. Att konstruktorn vägrar 0 noder och 0 vikter är det som gör det säkert
+  för `weightCount()` att läsa första raden i `myWeights`.
+* **Stubben har ingen bias.** Den ingår inte i `Interface`, och stubben optimerar aldrig
+  någonting, så det finns inget att lägga i den. **OBS!** Det gäller bara stubben: det skarpa
+  `Dense`-lagret i **L08–L09** behöver en biasvektor, som justeras tillsammans med vikterna vid
+  varje anrop till `optimize()`.
+* **`outputValue` gör två stubbar möjliga att skilja åt.** Ett nätverk vars samtliga lager
+  rapporterar samma utdata kan inte visa om en prediktion kom från utgångslagret eller från det
+  dolda lagret. Ger man varje lager sitt eget värde blir det synligt.
+* **Getters på stubben behöver ett eget `[[nodiscard]]`.** Attribut ärvs inte, så utan det
+  kompilerar ett bortkastat anrop som `stub.nodeCount();` utan varning, så snart anropet görs på en
+  `Stub` i stället för via en `Interface&`.
+* **`setOutput()` styr utdatan för ett helt nätverk i ett test.** Nätverket i **L07** lagrar sina
+  lager som referenser, så ett anrop till `setOutput()` på ett av lagren ändrar vad nätverket
+  predikterar. Det avslöjar om nätverket har sparat en egen kopia av utdatan, vilket noteringen om
+  `predict()` i **L07** är till för att förhindra.
+* **`feedforwardCount()` räknar varje anrop, även avvisade.** Räknaren mäter hur ofta lagret
+  *ombads* göra feedforward, inte hur ofta det gick med på det. `train()` i **L07** genomför en
+  feedforward per träningsuppsättning och epok, och en loop som kör ett enda pass i stället för
+  samtliga epoker stämmer fortfarande dimensionsmässigt. Utan räknaren går den inte att skilja från
+  en korrekt loop.
 
 ---
 
@@ -218,12 +193,11 @@ Notera följande i utskriften:
 Kontrollera er implementation mot testsviten i `exercises/test`. Se testsvitens 
 [README](../exercises/test/README.md) för detaljer.
 
-1. Om katalogen `libs/test` i repots rotkatalog är tom, hämta testramverket en gång via 
-   kommandot `git submodule update --init`.
-2. Bygg och kör testsviten via kommandot `make` i katalogen `exercises/test`.
-    * Skriver ni er kod i er egen `ml`-kodbas i stället för i `exercises`, ange sökvägen till den 
+1. Bygg och kör testsviten via kommandot `make` i katalogen `exercises/test`. Testramverket måste
+   ha hämtats först, se avsnitt 1.
+    * Skriver ni er kod i er egen `ml`-kodbas i stället för i `exercises`, ange sökvägen till den
       via `make ML_DIR=<sökväg till er ml-katalog>`.
-3. Åtgärda eventuella fel och kör testsviten igen, tills samtliga testfall går igenom.
+2. Åtgärda eventuella fel och kör testsviten igen, tills samtliga testfall går igenom.
 
 Testsviten kompilerar inte förrän båda headerfilerna finns och deklarerar samtliga metoder som 
 testerna anropar. Läs det första kompileringsfelet; det anger oftast vilken metod som saknas eller 
