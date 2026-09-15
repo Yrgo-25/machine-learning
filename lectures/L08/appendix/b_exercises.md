@@ -28,11 +28,10 @@ Skapa en ny fil döpt `dense.cpp` i `source/dense_layer`. Filsökvägen ska allt
 # Application target.
 TARGET := app
 
-# Source files.
-SOURCE_FILES := source/dense_layer/dense.cpp # Här läggs filen till i bygget.
-                source/dense_layer/stub.cpp\
-                source/main.cpp\
-				source/neural_network/shallow.cpp\
+# Source files (source/dense_layer/dense.cpp läggs till i bygget).
+SOURCE_FILES := source/dense_layer/dense.cpp \
+                source/main.cpp \
+                source/neural_network/shallow.cpp
 
 # Include directory.
 INCLUDE_DIR := include

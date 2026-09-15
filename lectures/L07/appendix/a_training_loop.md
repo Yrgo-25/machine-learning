@@ -1,8 +1,36 @@
-# Träningsloop: Från teori till kod
+# Nätverk och träningsloop: Från teori till kod
 
 ## Översikt
-Ni ska implementera metoden `train()` i `ml::neural_network::Shallow`. Metoden genomför den 
-kompletta träningsprocessen, upprepat för varje träningsuppsättning och epok:
+Ni ska implementera klassen `ml::neural_network::Shallow`, som kopplar ihop de två dense-lagren 
+från **L06** (se [L06 bilaga A](../../L06/appendix/a_architecture.md)) till ett nätverk. Klassen 
+har två centrala metoder:
+* `predict()`: Genomför feedforward genom båda lagren och returnerar nätverkets prediktion.
+* `train()`: Tränar nätverket, se avsnittet om träningsloopen nedan.
+
+---
+
+## Nätverkets struktur
+`Shallow` håller referenser till två dense-lager och kopplar ihop dem vid prediktion:
+
+```
+indata → myHiddenLayer.feedforward(input)
+               ↓
+       myHiddenLayer.output()
+               ↓
+       myOutputLayer.feedforward(...)
+               ↓
+       myOutputLayer.output()  →  prediktion
+```
+
+`Shallow` äger inte lagren, utan tar emot dem som referenser via konstruktorn. Detta gör det enkelt 
+att byta ut lager utan att ändra nätverksklassen; stubbarna från **L06** kan bytas mot skarpa 
+`Dense`-lager i **L08–L09** utan att en enda rad i `Shallow` ändras.
+
+---
+
+## Träningens tre steg
+Metoden `train()` genomför den kompletta träningsprocessen, upprepat för varje 
+träningsuppsättning och epok:
 * Feedforward: 
   * Beräknar utsignaler för varje nod i nätverket
   * Utdatan ur det sista lagret utgör nätverkets prediktion.

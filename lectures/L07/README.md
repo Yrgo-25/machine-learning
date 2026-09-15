@@ -1,11 +1,13 @@
 # L07 - Neurala nätverk (del III)
 
 ## Dagordning
-* Vidare arbete med övningsuppgiften – Skarp implementation av ett neuralt nätverk (del II).
+* Vidare arbete med övningsuppgiften: Enkelt neuralt nätverk i C++ (del II).
 
 ---
 
 ## Mål med lektionen
+* Ha skapat ett interface för neurala nätverk.
+* Kunna koppla ihop komponenter via interfaces.
 * Kunna skapa en enkel implementation av ett neuralt nätverk innehållande ett dolt lager samt ett utgångslager.
 
 ---
@@ -13,7 +15,7 @@
 ## Instruktioner
 
 ### Innan lektionen
-* Läs igenom [bilaga A](./appendix/a_training_loop.md) för en genomgång av träningsloopens struktur och hur feedforward, backpropagation och optimering hänger ihop i kod.
+* Läs igenom [bilaga A](./appendix/a_training_loop.md) för en genomgång av nätverkets struktur, träningsloopen samt hur feedforward, backpropagation och optimering hänger ihop i kod.
 
 ### Under lektionen
 * Delta aktivt på genomgången.
@@ -24,8 +26,9 @@
 ---
 
 ## Utvärdering
+* Kan ni, utan att titta i koden, beskriva hur komponenterna i nätverket kopplas ihop via interfaces?
 * Kan ni förklara flödet från indata till prediktion i er implementation, steg för steg?
-* Varför har `feedforward()` inget returvärde (`void`), och hur läser nätverkets övriga delar av resultatet istället?
+* Varför returnerar `feedforward()` en `bool` i stället för lagrets utdata, och hur läser nätverkets övriga delar av resultatet istället?
 
 ---
 

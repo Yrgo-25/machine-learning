@@ -3,13 +3,13 @@
 ## Dagordning
 * Påbörjande av övningsuppgift: Enkelt neuralt nätverk i C++ (del I).
 * Mer träning av neurala nätverk för hand.
+* Om tid finns: påbörjande av interface för neuralt nätverk (övningsuppgiftens del II).
 
 ---
 
 ## Mål med lektionen
-* Ha skapat ett interface för ett neuralt nätverk.
-* Kunna koppla ihop komponenter via interfaces.
-* Ha påbörjat implementationen av en skarp klass för ett enkelt neuralt nätverk.
+* Ha skapat ett interface för dense-lager.
+* Ha implementerat och testat en stubbklass som implementerar detta interface.
 
 ---
 
@@ -17,7 +17,7 @@
 
 ### Innan lektionen
 * Läs igenom [bilaga A](./appendix/a_architecture.md) för en översikt av den interface- och 
-klassstruktur ni ska bygga.
+klassstruktur ni ska bygga under L06–L07.
 
 ### Under lektionen
 * Delta aktivt på genomgången.
@@ -25,16 +25,18 @@ klassstruktur ni ska bygga.
     * Ni får tid på er att genomföra uppgiften enskilt eller i grupp.
     * Uppgiften gås sedan igenom i helklass.
 * Mer träning av neurala nätverk för hand.
+* Om tid finns, påbörja övningsuppgiften från **L07** (se
+[L07 bilaga B](../L07/appendix/b_exercises.md)), med avsnitt 1–2 (interface för neurala nätverk).
 
 ---
 
 ## Utvärdering
 * Varför är det fördelaktigt att definiera ett interface för dense-lagret snarare än att implementera en klass direkt?
-* Kan ni, utan att titta i koden, beskriva hur komponenterna i nätverket kopplas ihop via interfaces?
+* Varför räknar stubbens `feedforwardCount()` även avvisade anrop, och vad skulle ett test missa om den inte gjorde det?
 
 ---
 
 ## Nästa lektion
-* Vidare arbete med övningsuppgiften – Skarp implementation av ett neuralt nätverk (del II).
+* Vidare arbete med övningsuppgiften: Enkelt neuralt nätverk i C++ (del II).
 
 ---

@@ -13,6 +13,11 @@ ml::neural_network::Interface   (Interface för neurala nätverk)
         └── ml::dense_layer::Interface& myOutputLayer
 ```
 
+Strukturen byggs i två steg:
+1. **L06:** Dense-lagrets interface samt stubbklassen (`ml::dense_layer`).
+2. **L07:** Nätverkets interface samt klassen `Shallow` (`ml::neural_network`), se 
+   [L07 bilaga A](../../L07/appendix/a_training_loop.md).
+
 Under dessa lektioner används `ml::dense_layer::Stub` som placeholder. När en skarp implementation skapas i **L08–L09** ersätts stubben utan att resten av koden behöver ändras.
 
 ---
@@ -34,30 +39,12 @@ Under dessa lektioner används `ml::dense_layer::Stub` som placeholder. När en 
 
 ---
 
-## Nätverkets struktur
-`Shallow` håller referenser till två dense-lager och kopplar ihop dem vid prediktion:
-
-```
-indata → myHiddenLayer.feedforward(input)
-               ↓
-       myHiddenLayer.output()
-               ↓
-       myOutputLayer.feedforward(...)
-               ↓
-       myOutputLayer.output()  →  prediktion
-```
-
-`Shallow` äger inte lagren, utan tar emot dem som referenser via konstruktorn. Detta gör det enkelt 
-att byta ut lager utan att ändra nätverksklassen.
-
----
-
 ## Stubbklassen
 `ml::dense_layer::Stub` implementerar interfacet men gör ingenting av värde:
 * Feedforward sätter alltid utdata till ett fast värde (t.ex. `0.5`).
 * Backpropagation och optimering gör ingenting.
 
-Stubben finns till för att nätverket ska gå att kompilera och testköras redan nu. 
-En korrekt implementation följer i **L08–L09**.
+Stubben finns till för att nätverket i **L07** ska gå att kompilera och testköra innan en skarp 
+dense-lagerimplementation finns. En korrekt implementation följer i **L08–L09**.
 
 ---

@@ -1,6 +1,6 @@
 # Bilaga B - Övningsuppgift: Enkelt neuralt nätverk i C++ (del I)
-Ni ska bygga vidare på er `ml`-kodbas med ett interface samt en klass för ett enkelt neuralt 
-nätverk innehållande ett dolt lager samt ett utgångslager.
+Ni ska bygga vidare på er `ml`-kodbas med ett interface för dense-lager samt en stubbklass som 
+implementerar detta interface. Nätverket som använder lagren byggs under **L07**.
 
 ---
 
@@ -14,29 +14,25 @@ ml/
 │       ├── dense_layer/
 │       │   ├── interface.h
 │       │   └── stub.h
-│       ├── neural_network/
-│       │   ├── interface.h
-│       │   └── shallow.h
 │       └── types.h
 ├── source/
-│   ├── neural_network/
-│   │   └── shallow.cpp
 │   └── main.cpp
 └── Makefile
 ```
 
-Glöm inte att lägga till `source/neural_network/shallow.cpp` i er makefil.
+Både interfacet och stubbklassen implementeras direkt i sina headerfiler, så makefilen behöver 
+inte uppdateras under denna lektion.
 
 ---
 
-### 2. Dense-lagrets interface och stubbklass
+### 2. Dense-lagrets interface
 Det dolda lagret samt utgångslagret representeras av interfacet `ml::dense_layer::Interface`. 
 En skarp implementation skapas först under **L08–L09**. Fram tills dess implementerar ni en enkel 
-stubbklass `ml::dense_layer::Stub` som placeholder.
+stubbklass `ml::dense_layer::Stub` som placeholder, se avsnitt 3 nedan.
 
-**Interfacet (`ml/dense_layer/interface.h`):**
-I namnrymden `ml::dense_layer`, implementera ett interface döpt `Interface`. Samtliga metoder 
-(förutom destruktorn) ska deklareras som rent virtuella (`= 0`).
+I headerfilen `ml/dense_layer/interface.h`, lägg till namnrymden `ml::dense_layer`. I denna 
+namnrymd, implementera ett interface döpt `Interface`. Samtliga metoder (förutom destruktorn) ska 
+deklareras som rent virtuella (`= 0`).
 
 * **`~Interface()`:** Ska sättas till `default` samt markeras `virtual` och `noexcept`.
 
@@ -65,12 +61,15 @@ anroparen:
     * `input`: skrivskyddad flyttalsvektor.
     * `learningRate`: flyttal.
 
-**Stubbklassen (`ml/dense_layer/stub.h`):**
-I namnrymden `ml::dense_layer`, implementera en underklass döpt `Stub` som ärver `Interface` via 
-publikt arv. Klassen ska markeras `final`. Stubben genomför ingen riktig beräkning; den finns 
-enbart för att annan kod ska gå att kompilera, testköra och enhetstesta mot ett riktigt 
-`dense_layer::Interface` innan en skarp `Dense`-implementation finns (se **L08–L09**). Nätverket 
-ni bygger i avsnitt 4-8 nedan testas i sin helhet mot denna stubb, så det är värt att få den rätt.
+---
+
+### 3. Stubbklassen
+I headerfilen `ml/dense_layer/stub.h`, lägg till namnrymden `ml::dense_layer`. I denna namnrymd, 
+implementera en underklass döpt `Stub` som ärver `Interface` via publikt arv. Klassen ska markeras 
+`final`. Stubben genomför ingen riktig beräkning; den finns enbart för att annan kod ska gå att 
+kompilera, testköra och enhetstesta mot ett riktigt `dense_layer::Interface` innan en skarp 
+`Dense`-implementation finns (se **L08–L09**). Nätverket ni bygger under **L07** testas i sin 
+helhet mot denna stubb, så det är värt att få den rätt.
 
 Lägg till privata medlemsvariabler för utdatan, felet, vikterna samt feedforward-räknaren.
 
@@ -129,11 +128,11 @@ Klassen ska inneha följande publika metoder:
     * Returnerar ingenting, och ska markeras `noexcept`.
     * Ingår **inte** i `Interface`. Den finns enbart på stubben.
     * Det är denna metod som gör det möjligt att styra utdatan för ett helt nätverk i ett test:
-        * Nätverket lagrar sina lager som referenser, så ett anrop till `setOutput()` på det 
-          lager nätverket byggdes med ändrar vad nätverket predikterar.
+        * Nätverket ni bygger under **L07** lagrar sina lager som referenser, så ett anrop till 
+          `setOutput()` på det lager nätverket byggdes med ändrar vad nätverket predikterar.
         * Det avslöjar om nätverket läser sitt utgångslager direkt eller har sparat en egen 
-          kopia av utdatan. Just den kopian är vad noteringen i avsnitt 9 nedan är till för att 
-          förhindra.
+          kopia av utdatan. Just den kopian är vad noteringen om `predict()` i **L07** är till 
+          för att förhindra.
 * **`feedforwardCount()`** samt **`clearFeedforwardCount()`:**
     * `feedforwardCount()` returnerar antalet gånger `feedforward()` har anropats på detta 
       lager, och räknar **varje** anrop, inte bara de som klarade range-checken:
@@ -156,106 +155,51 @@ operatorer) raderas.
 
 ---
 
-### 3. Interface för neurala nätverk
-I headerfilen `ml/neural_network/interface.h`, lägg till en namnrymd döpt `ml::neural_network`. 
-I denna namnrymd, implementera ett interface döpt `Interface`:
+### 4. Kompilering och test
+Skriv en `main`-funktion i `main.cpp` som testar stubbklassen via följande steg:
+1. Skapa en `ml::dense_layer::Stub`-instans döpt `hiddenLayer` med 3 noder och 2 vikter per nod 
+   (defaultvärdet `0.5` som utdata).
+2. Skapa en `ml::dense_layer::Stub`-instans döpt `outputLayer` med 1 nod, 3 vikter per nod samt 
+   utdatan `0.8`. Antalet vikter i utgångslagret matchar antalet noder i det dolda lagret.
+3. Skriv ut antalet noder, antalet vikter per nod samt utdatan för båda lagren.
+4. Anropa `hiddenLayer.feedforward()` två gånger; först med 2 insignaler, sedan med 3. Skriv ut 
+   returvärdena, lagrets utdata samt feedforward-räknaren.
+5. Anropa `outputLayer.backpropagate()` med 1 referensvärde samt `hiddenLayer.backpropagate()` med 
+   `outputLayer` som nästa lager. Skriv ut returvärdena.
+6. Anropa `hiddenLayer.optimize()` med 2 insignaler två gånger; först med lärhastigheten `0.01`, 
+   sedan med `1.5`. Skriv ut returvärdena.
+7. Anropa `hiddenLayer.setOutput(0.1)` samt `hiddenLayer.clearFeedforwardCount()`. Skriv ut lagrets 
+   utdata samt feedforward-räknaren.
 
-* **`~Interface()`:** Ska sättas till `default` samt markeras `virtual` och `noexcept`.
-* **`predict(input)`:** Rent virtuell. `input`: skrivskyddad flyttalsvektor med indatan som 
-  prediktionen ska baseras på. Returnerar en referens till en flyttalsvektor med det predikterade 
-  värdet. Ska markeras `noexcept` (**inte** `const`, eftersom lagrens output uppdateras vid varje 
-  prediktion).
+Använd `std::boolalpha` för att skriva ut returvärdena som `true`/`false` i stället för `1`/`0`.
 
----
-
-### 4. Klassen Shallow - deklaration
-I headerfilen `ml/neural_network/shallow.h`, lägg till namnrymden `ml::neural_network`. Utgå från 
-interfacet och gör om det till en underklass:
-1. Kopiera in innehållet från `interface.h`, inklusive `#pragma once` samt namnrymden.
-2. Inkludera `ml/neural_network/interface.h`, så att basklassen är känd.
-3. Döp om klassen till `Shallow` och låt den ärva `Interface` via publikt arv. Klassen ska markeras 
-   `final`.
-4. Ta bort `virtual` samt `= 0` från metoderna; markera dem `override` i stället.
-
-Efter omvandlingen ska klassen inneha följande publika metoder:
-* **`~Shallow()`:** Ska markeras `default`, `noexcept` samt `override`.
-* **`predict()`:** Överlagring av motsvarande metod i interfacet. Ska markeras `noexcept` samt 
-  `override`.
-
----
-
-### 5. Privata medlemsvariabler
-Lägg till följande privata medlemsvariabler i `Shallow`:
-* **`myHiddenLayer`:** Referens till nätverkets dolda lager, erhålles via konstruktorn.
-* **`myOutputLayer`:** Referens till nätverkets utgångslager, erhålles via konstruktorn.
-* **`myTrainInput`:** Referens till träningsdatans indata, erhålles via konstruktorn.
-* **`myTrainOutput`:** Referens till träningsdatans utdata, erhålles via konstruktorn.
-* **`myTrainSetCount`:** Konstant osignerat heltal som anger antalet fullständiga träningsuppsättningar (dvs. det minsta av `myTrainInput.size()` och `myTrainOutput.size()`).
-
-Medlemsvariablerna läggs till före konstruktorn, så att ni vet exakt vad konstruktorn ska initiera.
-
----
-
-### 6. Konstruktor - deklaration
-Lägg till klassens enda implementerade konstruktor som publik metod:
-* **`Shallow()`:** Tar emot `hiddenLayer` samt `outputLayer` (nätverkets dolda lager respektive 
-  utgångslager, `ml::dense_layer::Interface&`), samt `trainInput` och `trainOutput` 
-  (skrivskyddade, tvådimensionella flyttalsvektorer med träningsdatans in- och utdata). Ska 
-  markeras `explicit` samt `noexcept`.
-
-Konstruktorn deklareras enbart här; den implementeras i uppgift 9.
-
----
-
-### 7. Borttagna konstruktorer och operatorer
-Radera klassens default-konstruktor, kopierings- och förflyttningskonstruktorer samt tillhörande operatorer.
-
----
-
-### 8. Övriga metoder - deklaration
-Lägg till följande publika metod i `Shallow`:
-* **`train(epochCount, learningRate = 0.01)`:** Tränar nätverket (implementeras i sin helhet i 
-  **L07**). `epochCount`: antal epoker att träna (osignerat heltal). `learningRate`: lärhastighet 
-  (flyttal). Returnerar `true` om träning genomfördes, annars `false`. Ska markeras `noexcept`.
-
-Ni får gärna lägga till fler (privata) metoder vid behov.
-
----
-
-### 9. Konstruktor och prediktion
-Implementera följande i `source/neural_network/shallow.cpp`:
-
-**Konstruktorn:**
-* Initiera samtliga medlemsvariabler enligt beskrivningen ovan.
-
-**Metoden `predict()`:**
-* Genomför feedforward genom hela nätverket:
-    1. Anropa `myHiddenLayer.feedforward(input)` med given indata.
-    2. Anropa `myOutputLayer.feedforward(myHiddenLayer.output())` med det dolda lagrets output som indata.
-* Returnera `myOutputLayer.output()` (en referens - ingen egen lagringsvariabel behövs i `Shallow`).
-
----
-
-### 10. Träningsmetod (placeholder)
-Implementera en tillfällig version av `train()` i `source/neural_network/shallow.cpp` som enbart returnerar `true`. Den fullständiga implementationen (feedforward, backpropagation samt optimering för varje träningsuppsättning och epok) genomförs under **L07**.
-
----
-
-### 11. Kompilering och test
-Skriv en `main`-funktion i `main.cpp` som:
-* Skapar en `ml::dense_layer::Stub`-instans för det dolda lagret samt en för utgångslagret (t.ex. 3 noder/2 vikter per nod respektive 1 nod/3 vikter per nod - antalet vikter i utgångslagret ska matcha antalet noder i det dolda lagret).
-* Skapar en `ml::neural_network::Shallow`-instans utifrån dessa två lager samt valfri träningsdata (t.ex. ett 2-bitars XOR-mönster).
-* Genomför en prediktion för varje träningsuppsättnings indata, och skriver ut indatan samt den predikterade utdatan i terminalen.
-
-Kompilera och testkör programmet. Ni ska få följande utskrift (dense-lagren är fortfarande stubbar, så prediktionen är alltid 0.5):
+Kompilera och testkör programmet. Ni ska få följande utskrift:
 
 ```
 --------------------------------------------------------------------------------
-Input: 0 0, predicted output: 0.5
-Input: 0 1, predicted output: 0.5
-Input: 1 0, predicted output: 0.5
-Input: 1 1, predicted output: 0.5
+Hidden layer: node count: 3, weight count: 2, output: 0.5 0.5 0.5
+Output layer: node count: 1, weight count: 3, output: 0.8
+--------------------------------------------------------------------------------
+Feedforward with 2 inputs: true
+Feedforward with 3 inputs: false
+Output after feedforward: 0.5 0.5 0.5
+Feedforward count: 2
+--------------------------------------------------------------------------------
+Backpropagate output layer: true
+Backpropagate hidden layer: true
+Optimize with learning rate 0.01: true
+Optimize with learning rate 1.5: false
+--------------------------------------------------------------------------------
+Output after setOutput(0.1): 0.1 0.1 0.1
+Feedforward count after clearFeedforwardCount(): 0
 --------------------------------------------------------------------------------
 ```
+
+Notera följande i utskriften:
+* Utdatan är fortfarande `0.5` efter feedforward, eftersom stubben inte beräknar någonting.
+* Feedforward-räknaren är `2` trots att det andra anropet avvisades.
+* `hiddenLayer.backpropagate(outputLayer)` lyckas eftersom utgångslagrets antal vikter per nod (3) 
+  matchar det dolda lagrets antal noder (3). Detta är samma koppling som nätverket i **L07** 
+  bygger på.
 
 ---
