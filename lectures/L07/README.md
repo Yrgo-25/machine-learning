@@ -18,10 +18,10 @@
 * Läs igenom [bilaga A](./appendix/a_training_loop.md) för en genomgång av nätverkets struktur, träningsloopen samt hur feedforward, backpropagation och optimering hänger ihop i kod.
 
 ### Under lektionen
-* Delta aktivt på genomgången.
+* Lektionen består av eget arbete; ingen genomgång hålls. Läraren går runt och hjälper till vid behov.
 * Genomför tillhörande övningsuppgift i [bilaga B](./appendix/b_exercises.md).
-    * Ni får tid på er att genomföra uppgiften enskilt eller i grupp.
-    * Uppgiften gås sedan igenom i helklass.
+    * Ni skriver koden själva, enskilt eller i grupp.
+    * Kör testsviten från **L06** efter varje ändring, så att stubbklassen fortsatt uppfyller specifikationen.
 
 ---
 

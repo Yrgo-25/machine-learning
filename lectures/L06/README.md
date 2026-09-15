@@ -20,10 +20,11 @@
 klassstruktur ni ska bygga under L06–L07.
 
 ### Under lektionen
-* Delta aktivt på genomgången.
+* Lektionen består av eget arbete; ingen genomgång hålls. Läraren går runt och hjälper till vid behov.
 * Genomför tillhörande övningsuppgift i [bilaga B](./appendix/b_exercises.md).
-    * Ni får tid på er att genomföra uppgiften enskilt eller i grupp.
-    * Uppgiften gås sedan igenom i helklass.
+    * Ni skriver koden själva, enskilt eller i grupp.
+    * Kontrollera er implementation mot testsviten i [exercises/test](./exercises/test/README.md) 
+      tills samtliga testfall går igenom.
 * Mer träning av neurala nätverk för hand.
 * Om tid finns, påbörja övningsuppgiften från **L07** (se
 [L07 bilaga B](../L07/appendix/b_exercises.md)), med avsnitt 1–2 (interface för neurala nätverk).

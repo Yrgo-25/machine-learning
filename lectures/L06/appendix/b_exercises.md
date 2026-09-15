@@ -5,7 +5,9 @@ implementerar detta interface. Nätverket som använder lagren byggs under **L07
 ---
 
 ### 1. Katalogstruktur
-Bygg ut katalogstrukturen i er befintliga `ml`-kodbas enligt nedan:
+Katalogen [`exercises`](../exercises) innehåller en färdig katalogstruktur med tomma headerfiler 
+för interfacet och stubbklassen, samt en testsvit i `exercises/test` (se avsnitt 5). Skriv er kod 
+där, eller bygg ut katalogstrukturen i er befintliga `ml`-kodbas enligt nedan:
 
 ```
 ml/
@@ -113,10 +115,18 @@ Klassen ska inneha följande publika metoder:
     * Ska markeras `override` (behåller interfacets `const` och `noexcept`, men **inte** 
       `[[nodiscard]]`).
 * **`feedforward()`**, båda varianterna av **`backpropagate()`** samt **`optimize()`**:
-    * Genomför endast range-checkar:
-        * Returnera `false` när dimensionerna inte stämmer, eller, för `optimize()`, när 
-          lärhastigheten ligger utanför `(0.0, 1.0)`.
-        * Returnera `true` annars.
+    * Genomför endast range-checkar, och returnerar `true` om samtliga villkor nedan är 
+      uppfyllda, annars `false`:
+
+      | Metod | Villkor |
+      |---|---|
+      | `feedforward(input)` | `input.size() == weightCount()` |
+      | `backpropagate(output)` | `output.size() == nodeCount()` |
+      | `backpropagate(nextLayer)` | `nextLayer.weightCount() == nodeCount()` |
+      | `optimize(input, learningRate)` | `input.size() == weightCount()` samt `0.0 < learningRate < 1.0` |
+
+    * Blanda inte ihop antalet noder och antalet vikter per nod. Indatan till ett lager har ett 
+      värde per vikt, medan referensvärdena har ett värde per nod.
     * Beräknar avsiktligt ingenting:
         * Utdatan förblir `outputValue` oavsett vad som matas in.
         * Felet förblir noll.
@@ -201,5 +211,25 @@ Notera följande i utskriften:
 * `hiddenLayer.backpropagate(outputLayer)` lyckas eftersom utgångslagrets antal vikter per nod (3) 
   matchar det dolda lagrets antal noder (3). Detta är samma koppling som nätverket i **L07** 
   bygger på.
+
+---
+
+### 5. Enhetstester
+Kontrollera er implementation mot testsviten i `exercises/test`. Se testsvitens 
+[README](../exercises/test/README.md) för detaljer.
+
+1. Om katalogen `libs/test` i repots rotkatalog är tom, hämta testramverket en gång via 
+   kommandot `git submodule update --init`.
+2. Bygg och kör testsviten via kommandot `make` i katalogen `exercises/test`.
+    * Skriver ni er kod i er egen `ml`-kodbas i stället för i `exercises`, ange sökvägen till den 
+      via `make ML_DIR=<sökväg till er ml-katalog>`.
+3. Åtgärda eventuella fel och kör testsviten igen, tills samtliga testfall går igenom.
+
+Testsviten kompilerar inte förrän båda headerfilerna finns och deklarerar samtliga metoder som 
+testerna anropar. Läs det första kompileringsfelet; det anger oftast vilken metod som saknas eller 
+har fel signatur.
+
+Konstruktorns anrop till `std::terminate()` testas inte av testsviten, eftersom det avslutar hela 
+testprogrammet. Kontrollera det för hand genom att skapa en stubb med 0 noder.
 
 ---
