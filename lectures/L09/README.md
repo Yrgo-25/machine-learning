@@ -17,6 +17,8 @@
 * Översätt de matematiska operationerna för feedforward, backpropagation och optimering som vi genomfört för hand till kod: 
     * Se [bilaga A](./appendix/a_math_to_code.md) för en översikt av hur matematiken motsvaras av koden.
     * Se [bilaga B](./appendix/b_exercises.md) för instruktioner gällande implementering av tidigarenämnda metoder.
+* Kontrollera er implementation mot testsviten i [exercises/test](./exercises/test/README.md) tills
+  samtliga testfall går igenom. Testsviten innehåller även testerna från **L06–L08**.
 * Testa implementationen genom att träna det neurala nätverk på befintlig träningsdata, justera vid behov antalet genomförda epoker och/eller lärhastigheten.
 
 ---
@@ -27,7 +29,7 @@
 
 ---
 
-## Nästa lektion (i januari)
+## Nästa lektion
 * Övningstentamen: Implementering av neurala nätverk + tester i C++.
 
 ---

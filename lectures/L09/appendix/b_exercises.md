@@ -4,7 +4,20 @@ matematiken från **L05** motsvaras av koden nedan.
 
 ---
 
-### 1. Hjälpfunktioner
+### 1. Kom igång
+Har ni inte redan hämtat testramverket under en tidigare lektion, gör det först. Kör följande
+kommando en gång, i repots rotkatalog:
+
+```bash
+git submodule update --init --recursive
+```
+
+Katalogen [`exercises`](../exercises) innehåller koden från **L06–L08**, samt en testsvit i
+`exercises/test` (se avsnitt 8). Skriv er kod där, eller i er befintliga `ml`-kodbas.
+
+---
+
+### 2. Hjälpfunktioner
 I filen `source/dense_layer/dense.cpp`, skapa en anonym namnrymd. I denna namnrymd, definiera 
 följande hjälpfunktioner:
 * `initRandom()`: Funktion för att initiera slumptalsgeneratorn en gång.
@@ -47,7 +60,7 @@ följande hjälpfunktioner:
 
 ---
 
-### 2. Randomisering av bias och vikter
+### 3. Randomisering av bias och vikter
 Randomisera samtliga biasvärden och vikter:
 * I konstruktorn, anropa först `initRandom()` för att initiera slumptalsgeneratorn.
 * Iterera genom samtliga noder i lagret med en for-loop: `for (std::size_t i{}; i < nodeCount; ++i)`.
@@ -59,7 +72,7 @@ Randomisera samtliga biasvärden och vikter:
 
 ---
 
-### 3. Metoden `feedforward()`
+### 4. Metoden `feedforward()`
 **Indatakontroll:**
 * Kontrollera att dimensionerna på given input matchar antalet vikter per nod i lagret (`input.size() == weightCount()`).
 * Om dimensionerna inte matchar: skriv ut felmeddelandet `"Input dimension mismatch: expected X, actual: Y!"` och returnera `false` utan att beräkna någonting.
@@ -77,7 +90,7 @@ Randomisera samtliga biasvärden och vikter:
 
 ---
 
-### 4. Metoden `backpropagate()` (utgångslager)
+### 5. Metoden `backpropagate()` (utgångslager)
 Implementera `backpropagate()` för utgångslager (med referensvärden):
 
 **Indatakontroll:**
@@ -98,7 +111,7 @@ Implementera `backpropagate()` för utgångslager (med referensvärden):
 
 ---
 
-### 5. Metoden `backpropagate()` (dolt lager)
+### 6. Metoden `backpropagate()` (dolt lager)
 Implementera `backpropagate()` för dolda lager (med fel och vikter från nästa lager):
 
 **Indatakontroll:**
@@ -119,7 +132,7 @@ Implementera `backpropagate()` för dolda lager (med fel och vikter från nästa
 
 ---
 
-### 6. Metoden `optimize()`
+### 7. Metoden `optimize()`
 **Indatakontroll:**
 * Kontrollera att lärhastigheten ligger inom intervallet `(0.0, 1.0)`, samma intervall som stubben kontrollerade i **L06**.
 * Om lärhastigheten är ogiltig: skriv ut felmeddelandet `"Invalid learning rate X!"` och returnera `false` utan att uppdatera någonting.
@@ -134,5 +147,30 @@ Implementera `backpropagate()` för dolda lager (med fel och vikter från nästa
         * `myWeights[i][j] += myError[i] * learningRate * input[j]`
 
 **Returvärde:** `true` när samtliga noders bias och vikter har uppdaterats.
+
+---
+
+### 8. Enhetstester
+Kontrollera er implementation mot testsviten i `exercises/test`. Se testsvitens
+[README](../exercises/test/README.md) för detaljer. Testsviten innehåller även testerna från
+**L06–L08**, så det räcker att köra denna.
+
+1. Bygg och kör testsviten via kommandot `make` i katalogen `exercises/test`. Testramverket måste
+   ha hämtats först, se avsnitt 1.
+    * Skriver ni er kod i er egen `ml`-kodbas i stället för i `exercises`, ange sökvägen till den
+      via `make ML_DIR=<sökväg till er ml-katalog>`.
+2. Åtgärda eventuella fel och kör testsviten igen, tills samtliga testfall går igenom.
+
+Testsviten kompilerar inte förrän `ml/dense_layer/dense.h` samt `source/dense_layer/dense.cpp`
+finns och deklarerar samtliga metoder som testerna anropar. Läs det första kompileringsfelet; det
+anger oftast vilken metod som saknas eller har fel signatur.
+
+Testerna jämför mot värden som räknas fram ur lagrets egna vikter, eftersom startvärdena slumpas.
+Testfallet `NetworkLearnsXorPattern` tränar slutligen ett helt nätverk av två dense-lager på
+XOR-mönstret och kontrollerar att det faktiskt lär sig.
+
+Felmeddelanden som `Input dimension mismatch` och `Invalid learning rate` skrivs ut av de testfall
+som medvetet anropar lagret med felaktiga argument. De betyder alltså inte att något test har
+misslyckats.
 
 ---
