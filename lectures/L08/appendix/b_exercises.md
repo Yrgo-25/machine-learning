@@ -3,14 +3,27 @@ Ni ska bygga vidare på er `ml`-kodbas från **L06-L07** genom att implementera 
 
 ---
 
-### 1. Enumerationsklassen `ActFunc`
+### 1. Kom igång
+Har ni inte redan hämtat testramverket under en tidigare lektion, gör det först. Kör följande
+kommando en gång, i repots rotkatalog:
+
+```bash
+git submodule update --init --recursive
+```
+
+Katalogen [`exercises`](../exercises) innehåller koden från **L06–L07**, samt en testsvit i
+`exercises/test` (se avsnitt 10). Skriv er kod där, eller i er befintliga `ml`-kodbas.
+
+---
+
+### 2. Enumerationsklassen `ActFunc`
 I `ml/types.h`, definiera en enumerationsklass döpt `ActFunc`. Denna enumerationsklass ska kunna användas för att välja aktiveringsfunktion för ett givet dense-lager. Följande enumeratorer ska läggas till:
 * `Relu`: För ReLU (`Rectified Linear Unit`), som för en given input x returnerar x om x > 0 annars 0.
 * `Tanh`: För hyperbolisk tangent, som ger utdata i intervallet [-1, 1].
 
 ---
 
-### 2. Skapa `dense.h`
+### 3. Skapa `dense.h`
 Skapa en ny fil döpt `dense.h` i `include/ml/dense_layer`. Filsökvägen ska alltså vara `include/ml/dense_layer/dense.h` och filen ska kunna inkluderas såsom visas nedan:
 
 ```cpp
@@ -19,7 +32,7 @@ Skapa en ny fil döpt `dense.h` i `include/ml/dense_layer`. Filsökvägen ska al
 
 ---
 
-### 3. Skapa `dense.cpp`
+### 4. Skapa `dense.cpp`
 Skapa en ny fil döpt `dense.cpp` i `source/dense_layer`. Filsökvägen ska alltså vara `source/dense_layer/dense.cpp`.
 
 **OBS! Glöm inte att lägga till denna filen i din makefil, se nedan!**
@@ -57,7 +70,7 @@ clean:
 
 ---
 
-### 4. Klassen `Dense` - deklaration
+### 5. Klassen `Dense` - deklaration
 I headerfilen `ml/dense_layer/dense.h`, lägg till klass döpt `Dense`, som ärver motsvarande interface, se filen `include/ml/dense_layer/interface.h`:
 * Använd publikt arv och markera klassen `final` så att den inte kan ärvas vidare.
 * Överlagra samtliga metoder från interfacet, inklusive destruktorn.
@@ -66,7 +79,7 @@ I headerfilen `ml/dense_layer/dense.h`, lägg till klass döpt `Dense`, som ärv
 
 ---
 
-### 5. Privata medlemsvariabler
+### 6. Privata medlemsvariabler
 Lägg till följande privata medlemsvariabler i klassen:
 * `myOutput`: Vektor innehållande nodernas output (flyttal). Ska ha utrymme för ett värde per nod i lagret.
 * `myPreActivationOutput`: Vektor innehållande nodernas viktade summa innan aktiveringsfunktionen
@@ -81,18 +94,18 @@ Medlemsvariablerna läggs till före konstruktorn, så att ni vet exakt vad kons
 
 ---
 
-### 6. Konstruktor
+### 7. Konstruktor
 Skapa en konstruktor som ska kunna användas för att skapa ett dense-lager med godtyckliga dimensioner samt en valbar aktiveringsfunktion.
 * **Tar emot:**
     * `nodeCount`: Antalet noder i lagret (osignerat heltal).
     * `weightCount`: Antalet vikter per nod i lagret (osignerat heltal).
-    * `actFunc`: Aktiveringsfunktionen som ska användas (av typen `ActFunc`). Som default ska `ReLU` användas.
+    * `actFunc`: Aktiveringsfunktionen som ska användas (av typen `ActFunc`). Som default ska aktiveringsfunktionen ReLU (`ActFunc::Relu` i implementationen) användas.
 * Ska markeras `explicit` samt `noexcept`.
 * Om `nodeCount` eller `weightCount` är lika med 0 ska ett felmeddelande skrivas ut och programmet avslutas genom att anropa `std::terminate()`.
 
 ---
 
-### 7. Borttagna konstruktorer och operatorer
+### 8. Borttagna konstruktorer och operatorer
 Radera följande:
 * Defaultkonstruktorn.
 * Kopieringskonstruktorn.
@@ -102,14 +115,15 @@ Radera följande:
 
 ---
 
-### 8. Definition av metoder
+### 9. Definition av metoder
 Definiera samtliga metoder, konstruktorer med mera som ej är markerade `delete` eller `default` i filen `source/dense_layer/dense.cpp`:
 
 **Konstruktor:**
 * I konstruktorn ska samtliga medlemsvariabler initieras:
     * `myOutput`, `myPreActivationOutput` samt `myError` ska innehålla `nodeCount` flyttal som är lika med 0.0 vid start.
-    * `myBias` ska innehålla `nodeCount` flyttal randomiserade mellan 0.0 - 1.0.
-    * `myWeights` ska innehålla `nodeCount` x `weightCount` flyttal randomiserade mellan 0.0 - 1.0.
+    * `myBias` ska innehålla `nodeCount` flyttal, och `myWeights` `nodeCount` x `weightCount`
+      flyttal, samtliga lika med 0.0 tills vidare. Under **L09** randomiseras de i stället mellan
+      0.0 och 1.0, när hjälpfunktionerna för detta finns på plats.
     * `myActFunc` ska tilldelas angiven aktiveringsfunktion.
 * Om `nodeCount` eller `weightCount` är lika med 0 ska felmeddelandet `Invalid dense layer parameters: nodeCount and weightCount must be greater than 0!` skrivas ut till standard error, varpå programmet ska avslutas genom att anropa `std::terminate()`, såsom visas nedan:
 
@@ -131,5 +145,27 @@ if ((0U == nodeCount) || (0U == weightCount))
     * Metoder som `nodeCount()`, `weightCount()` ska returnera antalet noder respektive vikter per nod i lagret.
     * Getter-metoder såsom `output()` samt `error()` ska returnera referenser till motsvarande medlemsvariabler.
     * De tre ej implementerade metoderna returnerar `bool` (se **L06**), så en tom funktionskropp kompilerar inte. Ge var och en av dem en platshållarkropp bestående av `return false;` tills ni implementerar den under **L09**. `false` i stället för `true`, så att en metod ni glömmer att färdigställa rapporterar att den misslyckades i stället för att tyst påstå att allt gick bra.
+
+---
+
+### 10. Enhetstester
+Kontrollera er implementation mot testsviten i `exercises/test`. Se testsvitens
+[README](../exercises/test/README.md) för detaljer. Testsviten innehåller även testerna från
+**L06–L07**, så det räcker att köra denna.
+
+1. Bygg och kör testsviten via kommandot `make` i katalogen `exercises/test`. Testramverket måste
+   ha hämtats först, se avsnitt 1.
+    * Skriver ni er kod i er egen `ml`-kodbas i stället för i `exercises`, ange sökvägen till den
+      via `make ML_DIR=<sökväg till er ml-katalog>`.
+2. Åtgärda eventuella fel och kör testsviten igen, tills samtliga testfall går igenom.
+
+Testsviten kompilerar inte förrän `ml/dense_layer/dense.h` samt `source/dense_layer/dense.cpp`
+finns och deklarerar samtliga metoder som testerna anropar. Läs det första kompileringsfelet; det
+anger oftast vilken metod som saknas eller har fel signatur.
+
+`feedforward()`, `backpropagate()` och `optimize()` testas först under **L09**, eftersom de enbart
+returnerar `false` tills vidare. Konstruktorns anrop till `std::terminate()` testas inte heller,
+eftersom det avslutar hela testprogrammet. Kontrollera det för hand genom att skapa ett lager med
+0 noder.
 
 ---

@@ -17,7 +17,9 @@
 * Använd er programkod från övningsuppgiften i L06-L07.
 * Läs igenom [bilaga A](./appendix/a_architecture.md) för information om dense-lagrets arkitektur.
 * Skapa en konkret implementation som ärver `ml::dense_layer::Interface`, se [bilaga B](./appendix/b_exercises.md) för detaljerade instruktioner.
-* Implementera samtliga metoder förutom de ovannämnda - låt dessa ha en tom funktionskropp tills vidare.
+* Implementera samtliga metoder förutom de ovannämnda - låt dessa returnera `false` tills vidare.
+* Kontrollera er implementation mot testsviten i [exercises/test](./exercises/test/README.md) tills
+  samtliga testfall går igenom. Testsviten innehåller även testerna från **L06–L07**.
 
 ---
 
