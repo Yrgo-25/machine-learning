@@ -6,8 +6,17 @@ neuralt nätverk innehållande ett dolt lager samt ett utgångslager. Lagren utg
 
 ---
 
-### 1. Katalogstruktur
-Bygg ut katalogstrukturen i er befintliga `ml`-kodbas enligt nedan:
+### 1. Kom igång
+Har ni inte redan hämtat testramverket under **L06**, gör det först. Kör följande kommando en
+gång, i repots rotkatalog:
+
+```bash
+git submodule update --init --recursive
+```
+
+Katalogen [`exercises`](../exercises) innehåller dense-lagrets interface och stubbklass från
+**L06**, samt en testsvit i `exercises/test` (se avsnitt 8). Skriv er kod där, eller bygg ut
+katalogstrukturen i er befintliga `ml`-kodbas enligt nedan:
 
 ```
 ml/
@@ -32,96 +41,82 @@ Glöm inte att lägga till `source/neural_network/shallow.cpp` i er makefil.
 ---
 
 ### 2. Interface för neurala nätverk
-I headerfilen `ml/neural_network/interface.h`, lägg till namnrymden `ml::neural_network`. 
-I denna namnrymd, implementera ett interface döpt `Interface`:
+I headerfilen `ml/neural_network/interface.h`, implementera klassen `Interface` i namnrymden
+`ml::neural_network`. Typerna är desamma som i **L06**: `Matrix1d` är en `std::vector<double>`,
+och `Matrix2d` en `std::vector<Matrix1d>`, båda från `ml/types.h`.
 
-* **`~Interface()`:** Ska sättas till `default` samt markeras `virtual` och `noexcept`.
-* **`predict(input)`:** Rent virtuell. `input`: skrivskyddad flyttalsvektor med indatan som 
-  prediktionen ska baseras på. Returnerar en referens till en flyttalsvektor med det predikterade 
-  värdet. Ska markeras `noexcept` (**inte** `const`, eftersom lagrens output uppdateras vid varje 
-  prediktion).
-
----
-
-### 3. Klassen Shallow - deklaration
-I headerfilen `ml/neural_network/shallow.h`, lägg till namnrymden `ml::neural_network`. Utgå från 
-interfacet och gör om det till en underklass:
-1. Kopiera in innehållet från `interface.h`, inklusive `#pragma once` samt namnrymden.
-2. Inkludera `ml/neural_network/interface.h`, så att basklassen är känd.
-3. Döp om klassen till `Shallow` och låt den ärva `Interface` via publikt arv. Klassen ska markeras 
-   `final`.
-4. Ta bort `virtual` samt `= 0` från metoderna; markera dem `override` i stället.
-
-Efter omvandlingen ska klassen inneha följande publika metoder:
-* **`~Shallow()`:** Ska markeras `default`, `noexcept` samt `override`.
-* **`predict()`:** Överlagring av motsvarande metod i interfacet. Ska markeras `noexcept` samt 
-  `override`.
+| Metod | Ingående argument | Returtyp | Markeras | Beskrivning |
+|---|---|---|---|---|
+| `~Interface()` | - | - | `virtual`, `noexcept`, `= default` | Destruktor. |
+| `predict()` | `const Matrix1d& input` | `const Matrix1d&` | `virtual`, `noexcept`, `= 0` | Predikterar utdata utifrån indatan `input`. |
 
 ---
 
-### 4. Privata medlemsvariabler
-Lägg till följande privata medlemsvariabler i `Shallow`:
-* **`myHiddenLayer`:** Referens till nätverkets dolda lager, erhålles via konstruktorn.
-* **`myOutputLayer`:** Referens till nätverkets utgångslager, erhålles via konstruktorn.
-* **`myTrainInput`:** Referens till träningsdatans indata, erhålles via konstruktorn.
-* **`myTrainOutput`:** Referens till träningsdatans utdata, erhålles via konstruktorn.
-* **`myTrainSetCount`:** Konstant osignerat heltal som anger antalet fullständiga 
-  träningsuppsättningar (dvs. det minsta av `myTrainInput.size()` och `myTrainOutput.size()`).
+### 3. Klassen Shallow
+I headerfilen `ml/neural_network/shallow.h`, deklarera klassen `Shallow` i namnrymden
+`ml::neural_network`. Klassen ärver `Interface` via publikt arv och markeras `final`. Metoderna
+implementeras i `source/neural_network/shallow.cpp`, se avsnitt 4–6.
 
-Medlemsvariablerna läggs till före konstruktorn, så att ni vet exakt vad konstruktorn ska initiera.
+Klassen ska inneha följande privata medlemsvariabler:
+
+| Medlemsvariabel | Typ | Innehåll |
+|---|---|---|
+| `myHiddenLayer` | `dense_layer::Interface&` | Nätverkets dolda lager. |
+| `myOutputLayer` | `dense_layer::Interface&` | Nätverkets utgångslager. |
+| `myTrainInput` | `const Matrix2d&` | Träningsdatans indata, en rad per träningsuppsättning. |
+| `myTrainOutput` | `const Matrix2d&` | Träningsdatans utdata, en rad per träningsuppsättning. |
+| `myTrainSetCount` | `const std::size_t` | Antal fullständiga träningsuppsättningar, dvs. det minsta av `myTrainInput.size()` och `myTrainOutput.size()`. |
+
+Klassen ska inneha följande publika metoder:
+
+| Metod | Ingående argument | Returtyp | Markeras | Beskrivning |
+|---|---|---|---|---|
+| `Shallow()` | `dense_layer::Interface& hiddenLayer`, `dense_layer::Interface& outputLayer`, `const Matrix2d& trainInput`, `const Matrix2d& trainOutput` | - | `explicit`, `noexcept` | Konstruktor. Initierar samtliga medlemsvariabler. |
+| `~Shallow()` | - | - | `noexcept`, `override`, `= default` | Destruktor. |
+| `predict()` | `const Matrix1d& input` | `const Matrix1d&` | `noexcept`, `override` | Genomför feedforward genom hela nätverket och returnerar utgångslagrets utdata. |
+| `train()` | `std::size_t epochCount`, `double learningRate = 0.01` | `bool` | `noexcept` | Tränar nätverket i `epochCount` epoker. Returnerar `true` efter genomförd träning, annars `false`. |
+
+Radera default-konstruktorn, copy- och move-konstruktorerna samt tillhörande
+tilldelningsoperatorer (`= delete`). Ni får gärna lägga till fler privata metoder vid behov.
+
+#### Att tänka på
+* **Utgå från interfacet.** Kopiera in innehållet i `ml/neural_network/interface.h` i
+  `shallow.h`, döp om klassen till `Shallow`, låt den ärva `Interface`, samt ersätt `virtual`
+  och `= 0` med `override`. Lägg därefter till det som saknas enligt tabellerna ovan.
+* **Två olika `Interface`.** Inkludera både `ml/neural_network/interface.h` och
+  `ml/dense_layer/interface.h` i `shallow.h`. Inuti `Shallow` syftar `Interface` på nätverkets
+  interface, så lagren måste skrivas ut som `dense_layer::Interface&`.
+* **`predict()` är inte `const`.** Varje prediktion uppdaterar lagrens utdata.
+* **`predict()` sparar ingen egen kopia av prediktionen.** Den returnerar en referens direkt till
+  utgångslagrets utdata. Det är detta som gör att `setOutput()` på stubben från **L06** slår
+  igenom på nätverkets prediktion; en egen kopia i `Shallow` hade gjort den inaktuell.
+* **Referenser som medlemsvariabler.** Lagren och träningsdatan måste leva minst lika länge som
+  nätverket, eftersom `Shallow` enbart refererar till dem.
 
 ---
 
-### 5. Konstruktor - deklaration
-Lägg till klassens enda implementerade konstruktor som publik metod:
-* **`Shallow()`:** Tar emot `hiddenLayer` samt `outputLayer` (nätverkets dolda lager respektive 
-  utgångslager, `ml::dense_layer::Interface&`), samt `trainInput` och `trainOutput` 
-  (skrivskyddade, tvådimensionella flyttalsvektorer med träningsdatans in- och utdata). Ska 
-  markeras `explicit` samt `noexcept`.
-
-Konstruktorn deklareras enbart här; den implementeras i avsnitt 8.
-
----
-
-### 6. Borttagna konstruktorer och operatorer
-Radera klassens default-konstruktor, kopierings- och förflyttningskonstruktorer samt tillhörande 
-operatorer.
-
----
-
-### 7. Övriga metoder - deklaration
-Lägg till följande publika metod i `Shallow`:
-* **`train(epochCount, learningRate = 0.01)`:** Tränar nätverket (implementeras i avsnitt 10). 
-  `epochCount`: antal epoker att träna (osignerat heltal). `learningRate`: lärhastighet 
-  (flyttal). Returnerar `true` om träning genomfördes, annars `false`. Ska markeras `noexcept`.
-
-Ni får gärna lägga till fler (privata) metoder vid behov.
-
----
-
-### 8. Konstruktor och prediktion
+### 4. Konstruktor och prediktion
 Implementera följande i `source/neural_network/shallow.cpp`:
 
 **Konstruktorn:**
-* Initiera samtliga medlemsvariabler enligt beskrivningen ovan.
+* Initiera samtliga medlemsvariabler enligt tabellen i avsnitt 3.
 
 **Metoden `predict()`:**
 * Genomför feedforward genom hela nätverket:
     1. Anropa `myHiddenLayer.feedforward(input)` med given indata.
     2. Anropa `myOutputLayer.feedforward(myHiddenLayer.output())` med det dolda lagrets output 
        som indata.
-* Returnera `myOutputLayer.output()`. Detta är en referens till utgångslagrets utdata, så ingen 
-  egen lagringsvariabel för prediktionen behövs i `Shallow`.
+* Returnera `myOutputLayer.output()`, dvs. en referens till utgångslagrets utdata.
 
 **Metoden `train()` (tillfällig):**
 * Ge `train()` en tillfällig funktionskropp bestående av `return false;`, så att filen är komplett 
-  och går att kompilera. Den fullständiga implementationen genomförs i avsnitt 10.
+  och går att kompilera. Den fullständiga implementationen genomförs i avsnitt 6.
 * `false` i stället för `true`, så att en metod ni glömmer att färdigställa rapporterar att den 
   misslyckades i stället för att tyst påstå att allt gick bra.
 
 ---
 
-### 9. Kontrollpunkt: prediktion
+### 5. Kontrollpunkt: prediktion
 Uppdatera `main`-funktionen i `main.cpp` så att den:
 * Skapar en `ml::dense_layer::Stub`-instans för det dolda lagret samt en för utgångslagret, t.ex. 
   3 noder/2 vikter per nod respektive 1 nod/3 vikter per nod. Antalet vikter i utgångslagret ska 
@@ -145,7 +140,7 @@ Input: 1 1, predicted output: 0.5
 
 ---
 
-### 10. Träningsmetod
+### 6. Träningsmetod
 Ersätt den tillfälliga versionen av `train()` i `source/neural_network/shallow.cpp` med en 
 fullständig implementation. Se [bilaga A](./a_training_loop.md) för en genomgång av träningsloopens 
 struktur.
@@ -183,7 +178,7 @@ genomförd träning.
 
 ---
 
-### 11. Kompilering och test
+### 7. Kompilering och test
 Uppdatera `main.cpp` så att `train()` anropas innan prediktion genomförs:
 * Träna nätverket under 100 epoker med lärhastigheten `0.01`.
 * Kontrollera returvärdet från `train()`. Skriv ut ett felmeddelande och avsluta programmet med en 
@@ -209,5 +204,22 @@ Notera följande i utskriften:
 * Bli inte oroliga över att nätverket inte predikterar korrekt; dense-lagren är fortfarande 
   stubbar och tränar därmed inte på riktigt. En skarp implementation av `Dense` läggs till under 
   **L08–L09**.
+
+---
+
+### 8. Enhetstester
+Kontrollera er implementation mot testsviten i `exercises/test`. Se testsvitens
+[README](../exercises/test/README.md) för detaljer. Testsviten innehåller även stubbtesterna från
+**L06**, så det räcker att köra denna.
+
+1. Bygg och kör testsviten via kommandot `make` i katalogen `exercises/test`. Testramverket måste
+   ha hämtats först, se avsnitt 1.
+    * Skriver ni er kod i er egen `ml`-kodbas i stället för i `exercises`, ange sökvägen till den
+      via `make ML_DIR=<sökväg till er ml-katalog>`.
+2. Åtgärda eventuella fel och kör testsviten igen, tills samtliga testfall går igenom.
+
+Testsviten kompilerar inte förrän samtliga headerfiler finns och deklarerar samtliga metoder som
+testerna anropar. Läs det första kompileringsfelet; det anger oftast vilken metod som saknas eller
+har fel signatur.
 
 ---

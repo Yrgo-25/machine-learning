@@ -21,7 +21,8 @@
 * Lektionen består av eget arbete; ingen genomgång hålls. Läraren går runt och hjälper till vid behov.
 * Genomför tillhörande övningsuppgift i [bilaga B](./appendix/b_exercises.md).
     * Ni skriver koden själva, enskilt eller i grupp.
-    * Kör testsviten från **L06** efter varje ändring, så att stubbklassen fortsatt uppfyller specifikationen.
+    * Kontrollera er implementation mot testsviten i [exercises/test](./exercises/test/README.md)
+      tills samtliga testfall går igenom. Testsviten innehåller även stubbtesterna från **L06**.
 
 ---
 
