@@ -9,6 +9,7 @@ CXX_FLAGS := -Wall -Werror -std=c++17 -Iinclude
 
 # Source files.
 SRC_FILES := source/main.cpp \
+             source/ml/neural_network/shallow.cpp \
 
 # Build and run the target by default.
 default: build run

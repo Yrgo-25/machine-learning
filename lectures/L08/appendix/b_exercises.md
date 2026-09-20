@@ -11,8 +11,15 @@ kommando en gång, i repots rotkatalog:
 git submodule update --init --recursive
 ```
 
-Katalogen [`exercises`](../exercises) innehåller koden från **L06–L07**, samt en testsvit i
-`exercises/test` (se avsnitt 10). Skriv er kod där, eller i er befintliga `ml`-kodbas.
+Katalogen [`exercises`](../exercises) innehåller lösningsförslaget från **L06–L07**, samt en
+testsvit i `exercises/test` (se avsnitt 10):
+* `include/ml/dense_layer/`: dense-lagrets interface samt stubbklassen `Stub` (**L06**).
+* `include/ml/neural_network/` samt `source/ml/neural_network/`: nätverkets interface samt klassen
+  `Shallow` (**L07**).
+* `include/ml/types.h`, `source/main.cpp` samt `Makefile`.
+
+Skriv er kod där, eller i er befintliga `ml`-kodbas. Är er egen kod från **L06–L07** inte färdig,
+utgå från lösningsförslaget, så att ni kan lägga hela lektionen på dense-lagret.
 
 ---
 
@@ -33,7 +40,7 @@ Skapa en ny fil döpt `dense.h` i `include/ml/dense_layer`. Filsökvägen ska al
 ---
 
 ### 4. Skapa `dense.cpp`
-Skapa en ny fil döpt `dense.cpp` i `source/dense_layer`. Filsökvägen ska alltså vara `source/dense_layer/dense.cpp`.
+Skapa en ny fil döpt `dense.cpp` i `source/ml/dense_layer`. Filsökvägen ska alltså vara `source/ml/dense_layer/dense.cpp`.
 
 **OBS! Glöm inte att lägga till denna filen i din makefil, se nedan!**
 
@@ -41,10 +48,10 @@ Skapa en ny fil döpt `dense.cpp` i `source/dense_layer`. Filsökvägen ska allt
 # Application target.
 TARGET := app
 
-# Source files (source/dense_layer/dense.cpp läggs till i bygget).
-SOURCE_FILES := source/dense_layer/dense.cpp \
+# Source files (source/ml/dense_layer/dense.cpp läggs till i bygget).
+SOURCE_FILES := source/ml/dense_layer/dense.cpp \
                 source/main.cpp \
-                source/neural_network/shallow.cpp
+                source/ml/neural_network/shallow.cpp
 
 # Include directory.
 INCLUDE_DIR := include
@@ -116,7 +123,7 @@ Radera följande:
 ---
 
 ### 9. Definition av metoder
-Definiera samtliga metoder, konstruktorer med mera som ej är markerade `delete` eller `default` i filen `source/dense_layer/dense.cpp`:
+Definiera samtliga metoder, konstruktorer med mera som ej är markerade `delete` eller `default` i filen `source/ml/dense_layer/dense.cpp`:
 
 **Konstruktor:**
 * I konstruktorn ska samtliga medlemsvariabler initieras:
@@ -159,7 +166,7 @@ Kontrollera er implementation mot testsviten i `exercises/test`. Se testsvitens
       via `make ML_DIR=<sökväg till er ml-katalog>`.
 2. Åtgärda eventuella fel och kör testsviten igen, tills samtliga testfall går igenom.
 
-Testsviten kompilerar inte förrän `ml/dense_layer/dense.h` samt `source/dense_layer/dense.cpp`
+Testsviten kompilerar inte förrän `ml/dense_layer/dense.h` samt `source/ml/dense_layer/dense.cpp`
 finns och deklarerar samtliga metoder som testerna anropar. Läs det första kompileringsfelet; det
 anger oftast vilken metod som saknas eller har fel signatur.
 

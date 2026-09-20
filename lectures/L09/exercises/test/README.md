@@ -36,7 +36,7 @@ Skriver ni er kod i er egen `ml`-kodbas i stället för i `exercises`, ange sök
 make ML_DIR=<sökväg till er ml-katalog>
 ```
 
-Testsviten kompilerar inte förrän `ml/dense_layer/dense.h` samt `source/dense_layer/dense.cpp`
+Testsviten kompilerar inte förrän `ml/dense_layer/dense.h` samt `source/ml/dense_layer/dense.cpp`
 finns, utöver filerna från **L06–L07**.
 
 **OBS!** Avbryts testsviten med `Segmentation fault` läser `train()` i `Shallow` sannolikt utanför

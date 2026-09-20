@@ -13,7 +13,7 @@ YRGO_TEST_LIB := $(YRGO_TEST_DIR)/libyrgo_test.a
 # Source files under test - the dense layer interface and stub are header-only, while the neural
 # network has a source file. Update this list as new source files are added to the implementation.
 # Note that main.cpp is excluded: the test suite provides its own main() in testsuite.cpp.
-SOURCE_FILES := $(ML_DIR)/source/neural_network/shallow.cpp
+SOURCE_FILES := $(ML_DIR)/source/ml/neural_network/shallow.cpp
 
 # Test files - update this list as new test files are added to this directory.
 TEST_FILES := ml/dense_layer/stub_test.cpp \

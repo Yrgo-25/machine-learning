@@ -12,13 +12,23 @@ kommando en gång, i repots rotkatalog:
 git submodule update --init --recursive
 ```
 
-Katalogen [`exercises`](../exercises) innehåller koden från **L06–L08**, samt en testsvit i
-`exercises/test` (se avsnitt 8). Skriv er kod där, eller i er befintliga `ml`-kodbas.
+Katalogen [`exercises`](../exercises) innehåller lösningsförslaget från **L06–L08**, samt en
+testsvit i `exercises/test` (se avsnitt 8):
+* `include/ml/dense_layer/`: dense-lagrets interface samt stubbklassen `Stub` (**L06**).
+* `include/ml/neural_network/` samt `source/ml/neural_network/`: nätverkets interface samt klassen
+  `Shallow` (**L07**).
+* `include/ml/dense_layer/dense.h` samt `source/ml/dense_layer/dense.cpp`: klassen `Dense`
+  (**L08**), där `feedforward()`, `backpropagate()` samt `optimize()` fortfarande är
+  platshållare.
+* `include/ml/types.h`, `source/main.cpp` samt `Makefile`.
+
+Skriv er kod där, eller i er befintliga `ml`-kodbas. Är er egen kod från **L06–L08** inte färdig,
+utgå från lösningsförslaget, så att ni kan lägga hela lektionen på de tre metoderna.
 
 ---
 
 ### 2. Hjälpfunktioner
-I filen `source/dense_layer/dense.cpp`, skapa en anonym namnrymd. I denna namnrymd, definiera 
+I filen `source/ml/dense_layer/dense.cpp`, skapa en anonym namnrymd. I denna namnrymd, definiera 
 följande hjälpfunktioner:
 * `initRandom()`: Funktion för att initiera slumptalsgeneratorn en gång.
     * **Implementation:**
@@ -161,7 +171,7 @@ Kontrollera er implementation mot testsviten i `exercises/test`. Se testsvitens
       via `make ML_DIR=<sökväg till er ml-katalog>`.
 2. Åtgärda eventuella fel och kör testsviten igen, tills samtliga testfall går igenom.
 
-Testsviten kompilerar inte förrän `ml/dense_layer/dense.h` samt `source/dense_layer/dense.cpp`
+Testsviten kompilerar inte förrän `ml/dense_layer/dense.h` samt `source/ml/dense_layer/dense.cpp`
 finns och deklarerar samtliga metoder som testerna anropar. Läs det första kompileringsfelet; det
 anger oftast vilken metod som saknas eller har fel signatur.
 

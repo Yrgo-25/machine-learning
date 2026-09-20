@@ -28,7 +28,7 @@ make ML_DIR=<sökväg till er ml-katalog>
 ```
 
 Testsviten kompilerar inte förrän `ml/neural_network/interface.h`, `ml/neural_network/shallow.h`
-samt `source/neural_network/shallow.cpp` finns.
+samt `source/ml/neural_network/shallow.cpp` finns.
 
 **OBS!** Avbryts testsviten med `Segmentation fault` läser `train()` sannolikt utanför
 träningsdatan. Kontrollera att `myTrainSetCount` är det minsta av antalet rader i `trainInput`

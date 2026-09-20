@@ -288,36 +288,11 @@ TEST(NeuralNetworkShallow, TrainDefaultLearningRate)
     EXPECT_EQ(hiddenLayer.feedforwardCount(), epochCount * Test::SetCount);
 }
 
-/**
- * @brief Verify that training fails when there isn't a single complete training set.
+/*
+ * A network with no complete training set, and one whose layers don't match, are both rejected by
+ * the constructor with std::terminate() (see section 4 of appendix B). Neither can be tested here:
+ * std::terminate() takes the whole test program down with it.
  */
-TEST(NeuralNetworkShallow, TrainRejectsEmptyTrainingData)
-{
-    constexpr std::size_t epochCount{5U};
-    const Matrix2d empty{};
-
-    // Case 1 - No training data at all.
-    {
-        DenseLayer hiddenLayer{Test::HiddenCount, Test::InputCount};
-        DenseLayer outputLayer{Test::OutputCount, Test::HiddenCount};
-        NeuralNetwork network{hiddenLayer, outputLayer, empty, empty};
-
-        // Expect the call to fail: a loop over zero training sets would otherwise report success.
-        EXPECT_FALSE(network.train(epochCount, Test::LearningRate));
-        EXPECT_EQ(hiddenLayer.feedforwardCount(), std::size_t{});
-    }
-
-    // Case 2 - Inputs but no reference values.
-    {
-        DenseLayer hiddenLayer{Test::HiddenCount, Test::InputCount};
-        DenseLayer outputLayer{Test::OutputCount, Test::HiddenCount};
-        NeuralNetwork network{hiddenLayer, outputLayer, TrainInput, empty};
-
-        // Expect the call to fail: without reference values there's no complete training set.
-        EXPECT_FALSE(network.train(epochCount, Test::LearningRate));
-        EXPECT_EQ(hiddenLayer.feedforwardCount(), std::size_t{});
-    }
-}
 
 /**
  * @brief Verify that training only uses complete training sets, i.e. the smaller of the input and
@@ -363,18 +338,7 @@ TEST(NeuralNetworkShallow, TrainStopsAtFirstFailedLayerCall)
     constexpr std::size_t epochCount{10U};
     constexpr std::size_t one{1U};
 
-    // Case 1 - The output layer's weight count doesn't match the hidden layer's node count.
-    {
-        DenseLayer hiddenLayer{Test::HiddenCount, Test::InputCount};
-        DenseLayer outputLayer{Test::OutputCount, Test::HiddenCount + 1U};
-        NeuralNetwork network{hiddenLayer, outputLayer, TrainInput, TrainOutput};
-
-        // Expect the hidden layer's backpropagation to fail.
-        EXPECT_FALSE(network.train(epochCount, Test::LearningRate));
-        EXPECT_EQ(hiddenLayer.feedforwardCount(), one);
-    }
-
-    // Case 2 - The training inputs are wider than the hidden layer's weight count.
+    // Case 1 - The training inputs are wider than the hidden layer's weight count.
     {
         const Matrix2d wideInput{
             {0.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {1.0, 0.0, 0.0}, {1.0, 1.0, 0.0}};
@@ -387,7 +351,7 @@ TEST(NeuralNetworkShallow, TrainStopsAtFirstFailedLayerCall)
         EXPECT_EQ(hiddenLayer.feedforwardCount(), one);
     }
 
-    // Case 3 - The reference values are wider than the output layer's node count.
+    // Case 2 - The reference values are wider than the output layer's node count.
     {
         const Matrix2d wideOutput{{0.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}, {0.0, 0.0}};
         DenseLayer hiddenLayer{Test::HiddenCount, Test::InputCount};

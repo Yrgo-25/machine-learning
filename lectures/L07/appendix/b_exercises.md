@@ -15,8 +15,13 @@ git submodule update --init --recursive
 ```
 
 Katalogen [`exercises`](../exercises) innehåller dense-lagrets interface och stubbklass från
-**L06**, samt en testsvit i `exercises/test` (se avsnitt 8). Skriv er kod där, eller bygg ut
-katalogstrukturen i er befintliga `ml`-kodbas enligt nedan:
+**L06**, samt en testsvit i `exercises/test` (se avsnitt 8). Där ligger även tre tomma filer
+märkta `@todo`, som ni fyller i under lektionen:
+* `include/ml/neural_network/interface.h` (avsnitt 2).
+* `include/ml/neural_network/shallow.h` (avsnitt 3).
+* `source/ml/neural_network/shallow.cpp` (avsnitt 4 och 6).
+
+Skriv er kod där, eller bygg ut katalogstrukturen i er befintliga `ml`-kodbas enligt nedan:
 
 ```
 ml/
@@ -30,13 +35,14 @@ ml/
 │       │   └── shallow.h
 │       └── types.h
 ├── source/
-│   ├── neural_network/
-│   │   └── shallow.cpp
+│   ├── ml/
+│   │   └── neural_network/
+│   │       └── shallow.cpp
 │   └── main.cpp
 └── Makefile
 ```
 
-Glöm inte att lägga till `source/neural_network/shallow.cpp` i er makefil.
+Glöm inte att lägga till `source/ml/neural_network/shallow.cpp` i er makefil.
 
 ---
 
@@ -55,7 +61,7 @@ och `Matrix2d` en `std::vector<Matrix1d>`, båda från `ml/types.h`.
 ### 3. Klassen Shallow
 I headerfilen `ml/neural_network/shallow.h`, deklarera klassen `Shallow` i namnrymden
 `ml::neural_network`. Klassen ärver `Interface` via publikt arv och markeras `final`. Metoderna
-implementeras i `source/neural_network/shallow.cpp`, se avsnitt 4–6.
+implementeras i `source/ml/neural_network/shallow.cpp`, se avsnitt 4–6.
 
 Klassen ska inneha följande privata medlemsvariabler:
 
@@ -71,7 +77,7 @@ Klassen ska inneha följande publika metoder:
 
 | Metod | Ingående argument | Returtyp | Markeras | Beskrivning |
 |---|---|---|---|---|
-| `Shallow()` | `dense_layer::Interface& hiddenLayer`, `dense_layer::Interface& outputLayer`, `const Matrix2d& trainInput`, `const Matrix2d& trainOutput` | - | `explicit`, `noexcept` | Konstruktor. Initierar samtliga medlemsvariabler. |
+| `Shallow()` | `dense_layer::Interface& hiddenLayer`, `dense_layer::Interface& outputLayer`, `const Matrix2d& trainInput`, `const Matrix2d& trainOutput` | - | `explicit`, `noexcept` | Konstruktor. Initierar samtliga medlemsvariabler, och avslutar programmet vid ogiltig konfiguration (se avsnitt 4). |
 | `~Shallow()` | - | - | `noexcept`, `override`, `= default` | Destruktor. |
 | `predict()` | `const Matrix1d& input` | `const Matrix1d&` | `noexcept`, `override` | Genomför feedforward genom hela nätverket och returnerar utgångslagrets utdata. |
 | `train()` | `std::size_t epochCount`, `double learningRate = 0.01` | `bool` | `noexcept` | Tränar nätverket i `epochCount` epoker. Returnerar `true` efter genomförd träning, annars `false`. |
@@ -83,9 +89,24 @@ tilldelningsoperatorer (`= delete`). Ni får gärna lägga till fler privata met
 * **Utgå från interfacet.** Kopiera in innehållet i `ml/neural_network/interface.h` i
   `shallow.h`, döp om klassen till `Shallow`, låt den ärva `Interface`, samt ersätt `virtual`
   och `= 0` med `override`. Lägg därefter till det som saknas enligt tabellerna ovan.
-* **Två olika `Interface`.** Inkludera både `ml/neural_network/interface.h` och
-  `ml/dense_layer/interface.h` i `shallow.h`. Inuti `Shallow` syftar `Interface` på nätverkets
-  interface, så lagren måste skrivas ut som `dense_layer::Interface&`.
+* **Två olika `Interface`.** Inuti `Shallow` syftar `Interface` på nätverkets interface, så lagren
+  måste skrivas ut som `dense_layer::Interface&`.
+* **Inkludera nätverkets interface, forward-deklarera dense-lagrets.** `shallow.h` inkluderar
+  `ml/neural_network/interface.h`, eftersom `Shallow` ärver den klassen. Dense-lagrets interface
+  ska däremot inte inkluderas här; en forward-deklaration räcker, eftersom medlemsvariablerna
+  enbart är referenser:
+
+  ```cpp
+  // clang-format off
+  namespace ml::dense_layer { class Interface; }
+  // clang-format on
+  ```
+
+  Forward-deklarera hellre än inkludera i headerfiler när det går. Det håller nere beroendena: den
+  som inkluderar `shallow.h` drar då inte med sig dense-lagrets interface i onödan, och en ändring
+  i `dense_layer/interface.h` tvingar inte fram en omkompilering av allt som använder nätverket.
+* **Inkludera dense-lagrets interface i `shallow.cpp`.** Där anropas lagrens metoder, och då krävs
+  den fullständiga klassdefinitionen. En forward-deklaration räcker inte.
 * **`predict()` är inte `const`.** Varje prediktion uppdaterar lagrens utdata.
 * **`predict()` sparar ingen egen kopia av prediktionen.** Den returnerar en referens direkt till
   utgångslagrets utdata. Det är detta som gör att `setOutput()` på stubben från **L06** slår
@@ -96,10 +117,18 @@ tilldelningsoperatorer (`= delete`). Ni får gärna lägga till fler privata met
 ---
 
 ### 4. Konstruktor och prediktion
-Implementera följande i `source/neural_network/shallow.cpp`:
+Implementera följande i `source/ml/neural_network/shallow.cpp`:
 
 **Konstruktorn:**
 * Initiera samtliga medlemsvariabler enligt tabellen i avsnitt 3.
+* Skriv därefter ut ett felmeddelande och anropa `std::terminate()` om något av följande gäller:
+    * `myTrainSetCount == 0`, dvs. det minsta av `trainInput.size()` och `trainOutput.size()` är
+      0. Utan en enda fullständig träningsuppsättning finns det ingenting att träna på.
+    * `myHiddenLayer.nodeCount() != myOutputLayer.weightCount()`, dvs. lagren är felkopplade.
+      Utgångslagret måste ha en vikt per nod i det dolda lagret, eftersom det dolda lagrets
+      utdata utgör utgångslagrets indata.
+* Som i **L02**, **L04** samt **L06** är konstruktorn den enda plats som avslutar programmet,
+  eftersom den inte kan returnera någon felkod till anroparen.
 
 **Metoden `predict()`:**
 * Genomför feedforward genom hela nätverket:
@@ -117,39 +146,45 @@ Implementera följande i `source/neural_network/shallow.cpp`:
 ---
 
 ### 5. Kontrollpunkt: prediktion
-Uppdatera `main`-funktionen i `main.cpp` så att den:
-* Skapar en `ml::dense_layer::Stub`-instans för det dolda lagret samt en för utgångslagret, t.ex. 
-  3 noder/2 vikter per nod respektive 1 nod/3 vikter per nod. Antalet vikter i utgångslagret ska 
-  matcha antalet noder i det dolda lagret.
-* Skapar en `ml::neural_network::Shallow`-instans utifrån dessa två lager samt valfri 
-  träningsdata, t.ex. ett 2-bitars XOR-mönster.
-* Genomför en prediktion för varje träningsuppsättnings indata, och skriver ut indatan samt den 
-  predikterade utdatan i terminalen.
+Testprogrammet i `source/main.cpp` är redan skrivet. Det genomför följande:
+1. Skapar två stubbar: det dolda lagret med 3 noder och 2 vikter per nod, samt utgångslagret med
+   1 nod och 3 vikter per nod. Antalet vikter i utgångslagret matchar antalet noder i det dolda
+   lagret, vilket är det som kopplar ihop dem.
+2. Skapar ett `ml::neural_network::Shallow`-nätverk av de två lagren, med ett 2-bitars
+   XOR-mönster som träningsdata.
+3. Predikterar för varje träningsuppsättnings indata, tränar nätverket i 100 epoker med
+   lärhastigheten `0.01`, och predikterar sedan igen.
 
-Kompilera och testkör programmet. Ni ska få följande utskrift (dense-lagren är stubbar, så 
-prediktionen är alltid 0.5):
+Kompilera och testkör programmet via kommandot `make`. Eftersom `train()` fortfarande är en
+platshållare som returnerar `false` avbryts programmet efter de första prediktionerna:
 
 ```
 --------------------------------------------------------------------------------
+Predictions before training:
 Input: 0 0, predicted output: 0.5
 Input: 0 1, predicted output: 0.5
 Input: 1 0, predicted output: 0.5
 Input: 1 1, predicted output: 0.5
 --------------------------------------------------------------------------------
+Training failed!
 ```
+
+Prediktionen är alltid 0.5, eftersom dense-lagren är stubbar. Felmeddelandet är väntat i detta
+läge; det försvinner när `train()` implementeras i avsnitt 6.
 
 ---
 
 ### 6. Träningsmetod
-Ersätt den tillfälliga versionen av `train()` i `source/neural_network/shallow.cpp` med en 
+Ersätt den tillfälliga versionen av `train()` i `source/ml/neural_network/shallow.cpp` med en 
 fullständig implementation. Se [bilaga A](./a_training_loop.md) för en genomgång av träningsloopens 
 struktur.
 
 **Indatakontroll:**
-* Returnera `false` om `myTrainSetCount == 0`, `epochCount == 0` eller 
-  `learningRate <= 0.0 || learningRate >= 1.0`.
-* Som i **L02** och **L04** rapporterar `train()` ogiltiga argument via sitt returvärde. Endast en 
-  konstruktor anropar `std::terminate()`, eftersom den inte kan returnera någon felkod till 
+* Returnera `false` om `epochCount == 0` eller `learningRate <= 0.0 || learningRate >= 1.0`.
+* Träningsdatan behöver inte kontrolleras här. Konstruktorn har redan garanterat minst en
+  fullständig träningsuppsättning samt att lagren är rätt kopplade (se avsnitt 4).
+* Som i **L02** och **L04** rapporterar `train()` ogiltiga argument via sitt returvärde. Endast
+  konstruktorn anropar `std::terminate()`, eftersom den inte kan returnera någon felkod till
   anroparen.
 
 **Träning:**
@@ -179,18 +214,17 @@ genomförd träning.
 ---
 
 ### 7. Kompilering och test
-Uppdatera `main.cpp` så att `train()` anropas innan prediktion genomförs:
-* Träna nätverket under 100 epoker med lärhastigheten `0.01`.
-* Kontrollera returvärdet från `train()`. Skriv ut ett felmeddelande och avsluta programmet med en 
-  felkod om träningen misslyckas.
-* Skriv ut det dolda lagrets feedforward-räknare (`feedforwardCount()`) efter träningen.
-
-Kompilera och testkör programmet. Ni ska få följande utskrift:
+Kompilera och testkör programmet igen via kommandot `make`. Nu ska hela programmet gå igenom:
 
 ```
 --------------------------------------------------------------------------------
-Feedforward count after training: 400
+Predictions before training:
+Input: 0 0, predicted output: 0.5
+Input: 0 1, predicted output: 0.5
+Input: 1 0, predicted output: 0.5
+Input: 1 1, predicted output: 0.5
 --------------------------------------------------------------------------------
+Predictions after training:
 Input: 0 0, predicted output: 0.5
 Input: 0 1, predicted output: 0.5
 Input: 1 0, predicted output: 0.5
@@ -199,11 +233,11 @@ Input: 1 1, predicted output: 0.5
 ```
 
 Notera följande i utskriften:
-* Feedforward-räknaren ska vara exakt 400, dvs. en feedforward per träningsuppsättning (4) och 
-  epok (100). Ett annat värde betyder att träningsloopen itererar fel.
-* Bli inte oroliga över att nätverket inte predikterar korrekt; dense-lagren är fortfarande 
-  stubbar och tränar därmed inte på riktigt. En skarp implementation av `Dense` läggs till under 
-  **L08–L09**.
+* Prediktionerna är identiska före och efter träningen. Detta är förväntat, då dense-lagren
+  fortfarande är stubbar och tränar därmed inte på riktigt. En skarp implementation av `Dense` läggs 
+  till under **L08–L09**.
+* Att träningsloopen verkligen genomför en feedforward per träningsuppsättning och epok kontrolleras 
+  av testsviten (se avsnitt 8), inte av testprogrammet.
 
 ---
 
@@ -221,5 +255,9 @@ Kontrollera er implementation mot testsviten i `exercises/test`. Se testsvitens
 Testsviten kompilerar inte förrän samtliga headerfiler finns och deklarerar samtliga metoder som
 testerna anropar. Läs det första kompileringsfelet; det anger oftast vilken metod som saknas eller
 har fel signatur.
+
+Konstruktorns anrop till `std::terminate()` testas inte av testsviten, eftersom det avslutar hela
+testprogrammet. Kontrollera dem för hand: skapa ett nätverk utan träningsdata, samt ett vars lager
+inte matchar varandra.
 
 ---
