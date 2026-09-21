@@ -120,6 +120,23 @@ Matrix1d recoverReluBias(DenseLayer& denseLayer) noexcept
 }
 
 /**
+ * @brief Recover the bias of a layer without an activation function.
+ *
+ *        A zero input makes each node's weighted sum equal to its bias, which the layer outputs
+ *        unchanged.
+ *
+ * @param[in] denseLayer Layer to recover the bias from. Its output is overwritten.
+ *
+ * @return The bias of each node.
+ */
+Matrix1d recoverNoneBias(DenseLayer& denseLayer) noexcept
+{
+    const Matrix1d zeroInput(denseLayer.weightCount(), 0.0);
+    denseLayer.feedforward(zeroInput);
+    return denseLayer.output();
+}
+
+/**
  * @brief Recover the bias of a Tanh layer.
  *
  *        A zero input makes the output tanh(bias), which std::atanh() inverts.
@@ -225,19 +242,22 @@ TEST(DenseLayerDense, ConstructedOutputAndErrorAreZero)
 }
 
 /**
- * @brief Verify that a layer can be built with either activation function, or with the default.
+ * @brief Verify that a layer can be built with each activation function, or with the default.
  */
 TEST(DenseLayerDense, ConstructedWithEachActivationFunction)
 {
     const DenseLayer defaultLayer{Test::NodeCount, Test::WeightCount};
     const DenseLayer reluLayer{Test::NodeCount, Test::WeightCount, ActFunc::Relu};
     const DenseLayer tanhLayer{Test::NodeCount, Test::WeightCount, ActFunc::Tanh};
+    const DenseLayer noneLayer{Test::NodeCount, Test::WeightCount, ActFunc::None};
 
-    // Test the two enumerators of ActFunc.
+    // Test the three enumerators of ActFunc.
     // Expect them to be distinct values.
     EXPECT_TRUE(ActFunc::Relu != ActFunc::Tanh);
+    EXPECT_TRUE(ActFunc::Relu != ActFunc::None);
+    EXPECT_TRUE(ActFunc::Tanh != ActFunc::None);
 
-    for (const DenseLayer* denseLayer : {&defaultLayer, &reluLayer, &tanhLayer})
+    for (const DenseLayer* denseLayer : {&defaultLayer, &reluLayer, &tanhLayer, &noneLayer})
     {
         EXPECT_EQ(denseLayer->nodeCount(), Test::NodeCount);
         EXPECT_EQ(denseLayer->weightCount(), Test::WeightCount);
@@ -258,6 +278,85 @@ TEST(DenseLayerDense, UsableThroughInterface)
     EXPECT_EQ(layerInterface.error().size(), Test::NodeCount);
     EXPECT_EQ(layerInterface.weights().size(), Test::NodeCount);
     EXPECT_TRUE(&layerInterface.output() == &denseLayer.output());
+}
+
+/**
+ * @brief Verify that feedforward requires one input value per weight.
+ */
+TEST(DenseLayerDense, FeedforwardChecksInputSize)
+{
+    DenseLayer denseLayer{Test::NodeCount, Test::WeightCount};
+
+    EXPECT_TRUE(denseLayer.feedforward(Matrix1d(Test::WeightCount, 1.0)));
+    EXPECT_FALSE(denseLayer.feedforward(Matrix1d(Test::WeightCount - 1U, 1.0)));
+    EXPECT_FALSE(denseLayer.feedforward(Matrix1d(Test::WeightCount + 1U, 1.0)));
+    EXPECT_FALSE(denseLayer.feedforward(Matrix1d{}));
+
+    // Test an input sized to the node count rather than the weight count.
+    // Expect rejection: mixing the two counts up is the easiest mistake to make here.
+    EXPECT_FALSE(denseLayer.feedforward(Matrix1d(Test::NodeCount, 1.0)));
+}
+
+/**
+ * @brief Verify that output-layer backpropagation requires one reference value per node.
+ */
+TEST(DenseLayerDense, BackpropagateChecksReferenceSize)
+{
+    DenseLayer denseLayer{Test::NodeCount, Test::WeightCount};
+
+    EXPECT_TRUE(denseLayer.backpropagate(Matrix1d(Test::NodeCount, 1.0)));
+    EXPECT_FALSE(denseLayer.backpropagate(Matrix1d(Test::NodeCount - 1U, 1.0)));
+    EXPECT_FALSE(denseLayer.backpropagate(Matrix1d(Test::NodeCount + 1U, 1.0)));
+    EXPECT_FALSE(denseLayer.backpropagate(Matrix1d{}));
+    EXPECT_FALSE(denseLayer.backpropagate(Matrix1d(Test::WeightCount, 1.0)));
+}
+
+/**
+ * @brief Verify that hidden-layer backpropagation requires one weight per node in the next layer.
+ */
+TEST(DenseLayerDense, BackpropagateChecksNextLayerWeightCount)
+{
+    DenseLayer denseLayer{Test::NodeCount, Test::WeightCount};
+    DenseLayer matching{1U, Test::NodeCount};
+    DenseLayer mismatched{1U, Test::NodeCount + 1U};
+
+    EXPECT_TRUE(denseLayer.backpropagate(matching));
+    EXPECT_FALSE(denseLayer.backpropagate(mismatched));
+}
+
+/**
+ * @brief Verify that optimization requires one input value per weight.
+ */
+TEST(DenseLayerDense, OptimizeChecksInputSize)
+{
+    DenseLayer denseLayer{Test::NodeCount, Test::WeightCount};
+
+    EXPECT_TRUE(denseLayer.optimize(Matrix1d(Test::WeightCount, 1.0), Test::LearningRate));
+    EXPECT_FALSE(denseLayer.optimize(Matrix1d(Test::WeightCount - 1U, 1.0), Test::LearningRate));
+    EXPECT_FALSE(denseLayer.optimize(Matrix1d(Test::WeightCount + 1U, 1.0), Test::LearningRate));
+    EXPECT_FALSE(denseLayer.optimize(Matrix1d{}, Test::LearningRate));
+    EXPECT_FALSE(denseLayer.optimize(Matrix1d(Test::NodeCount, 1.0), Test::LearningRate));
+}
+
+/**
+ * @brief Verify that optimization requires a learning rate inside the range (0.0, 1.0).
+ */
+TEST(DenseLayerDense, OptimizeChecksLearningRate)
+{
+    constexpr double validRates[]{1e-9, 0.01, 0.5, 0.999};
+    constexpr double invalidRates[]{0.0, -1e-9, -0.5, 1.0, 1.5, 100.0};
+
+    DenseLayer denseLayer{Test::NodeCount, Test::WeightCount};
+    const Matrix1d input(Test::WeightCount, 1.0);
+
+    for (const auto learningRate : validRates)
+    {
+        EXPECT_TRUE(denseLayer.optimize(input, learningRate));
+    }
+    for (const auto learningRate : invalidRates)
+    {
+        EXPECT_FALSE(denseLayer.optimize(input, learningRate));
+    }
 }
 
 /**
@@ -418,6 +517,24 @@ TEST(DenseLayerDense, FeedforwardAppliesActivationFunction)
             }
         }
     }
+
+    // Case 3 - None.
+    {
+        DenseLayer denseLayer{Test::NodeCount, Test::WeightCount, ActFunc::None};
+        const auto bias = recoverNoneBias(denseLayer);
+
+        for (const auto& input : {negativeInput, positiveInput})
+        {
+            EXPECT_TRUE(denseLayer.feedforward(input));
+
+            // Expect the weighted sum itself, negative sums included.
+            for (std::size_t i{}; i < Test::NodeCount; ++i)
+            {
+                const auto sum = weightedSum(denseLayer.weights(), bias, input, i);
+                EXPECT_NEAR(denseLayer.output()[i], sum, Test::ExactTolerance);
+            }
+        }
+    }
 }
 
 /**
@@ -537,6 +654,29 @@ TEST(DenseLayerDense, BackpropagateUsesPreActivationDerivative)
 }
 
 /**
+ * @brief Verify that a layer without an activation function passes the raw error through, since
+ *        the derivative of the identity is 1.0 for every weighted sum.
+ */
+TEST(DenseLayerDense, BackpropagateNoneUsesUnitDerivative)
+{
+    // Large negative inputs against non-negative weights drive the sums below zero, where ReLU's
+    // derivative is 0.0, so a None layer that falls back on ReLU's derivative doesn't pass.
+    const Matrix1d input{-50.0, -50.0};
+    const Matrix1d reference{1.0, 0.0, -1.0};
+
+    DenseLayer denseLayer{Test::NodeCount, Test::WeightCount, ActFunc::None};
+    EXPECT_TRUE(denseLayer.feedforward(input));
+    const auto output = denseLayer.output();
+
+    EXPECT_TRUE(denseLayer.backpropagate(reference));
+
+    for (std::size_t i{}; i < Test::NodeCount; ++i)
+    {
+        EXPECT_NEAR(denseLayer.error()[i], reference[i] - output[i], Test::ExactTolerance);
+    }
+}
+
+/**
  * @brief Verify that a hidden layer computes its error from the next layer's error and weights.
  */
 TEST(DenseLayerDense, BackpropagateHiddenLayerComputesError)
@@ -639,85 +779,6 @@ TEST(DenseLayerDense, OptimizeRejectedLeavesParametersUnchanged)
         {
             EXPECT_NEAR(denseLayer.weights()[i][j], weightsBefore[i][j], Test::ExactTolerance);
         }
-    }
-}
-
-/**
- * @brief Verify that feedforward requires one input value per weight.
- */
-TEST(DenseLayerDense, FeedforwardChecksInputSize)
-{
-    DenseLayer denseLayer{Test::NodeCount, Test::WeightCount};
-
-    EXPECT_TRUE(denseLayer.feedforward(Matrix1d(Test::WeightCount, 1.0)));
-    EXPECT_FALSE(denseLayer.feedforward(Matrix1d(Test::WeightCount - 1U, 1.0)));
-    EXPECT_FALSE(denseLayer.feedforward(Matrix1d(Test::WeightCount + 1U, 1.0)));
-    EXPECT_FALSE(denseLayer.feedforward(Matrix1d{}));
-
-    // Test an input sized to the node count rather than the weight count.
-    // Expect rejection: mixing the two counts up is the easiest mistake to make here.
-    EXPECT_FALSE(denseLayer.feedforward(Matrix1d(Test::NodeCount, 1.0)));
-}
-
-/**
- * @brief Verify that output-layer backpropagation requires one reference value per node.
- */
-TEST(DenseLayerDense, BackpropagateChecksReferenceSize)
-{
-    DenseLayer denseLayer{Test::NodeCount, Test::WeightCount};
-
-    EXPECT_TRUE(denseLayer.backpropagate(Matrix1d(Test::NodeCount, 1.0)));
-    EXPECT_FALSE(denseLayer.backpropagate(Matrix1d(Test::NodeCount - 1U, 1.0)));
-    EXPECT_FALSE(denseLayer.backpropagate(Matrix1d(Test::NodeCount + 1U, 1.0)));
-    EXPECT_FALSE(denseLayer.backpropagate(Matrix1d{}));
-    EXPECT_FALSE(denseLayer.backpropagate(Matrix1d(Test::WeightCount, 1.0)));
-}
-
-/**
- * @brief Verify that hidden-layer backpropagation requires one weight per node in the next layer.
- */
-TEST(DenseLayerDense, BackpropagateChecksNextLayerWeightCount)
-{
-    DenseLayer denseLayer{Test::NodeCount, Test::WeightCount};
-    DenseLayer matching{1U, Test::NodeCount};
-    DenseLayer mismatched{1U, Test::NodeCount + 1U};
-
-    EXPECT_TRUE(denseLayer.backpropagate(matching));
-    EXPECT_FALSE(denseLayer.backpropagate(mismatched));
-}
-
-/**
- * @brief Verify that optimization requires one input value per weight.
- */
-TEST(DenseLayerDense, OptimizeChecksInputSize)
-{
-    DenseLayer denseLayer{Test::NodeCount, Test::WeightCount};
-
-    EXPECT_TRUE(denseLayer.optimize(Matrix1d(Test::WeightCount, 1.0), Test::LearningRate));
-    EXPECT_FALSE(denseLayer.optimize(Matrix1d(Test::WeightCount - 1U, 1.0), Test::LearningRate));
-    EXPECT_FALSE(denseLayer.optimize(Matrix1d(Test::WeightCount + 1U, 1.0), Test::LearningRate));
-    EXPECT_FALSE(denseLayer.optimize(Matrix1d{}, Test::LearningRate));
-    EXPECT_FALSE(denseLayer.optimize(Matrix1d(Test::NodeCount, 1.0), Test::LearningRate));
-}
-
-/**
- * @brief Verify that optimization requires a learning rate inside the range (0.0, 1.0).
- */
-TEST(DenseLayerDense, OptimizeChecksLearningRate)
-{
-    constexpr double validRates[]{1e-9, 0.01, 0.5, 0.999};
-    constexpr double invalidRates[]{0.0, -1e-9, -0.5, 1.0, 1.5, 100.0};
-
-    DenseLayer denseLayer{Test::NodeCount, Test::WeightCount};
-    const Matrix1d input(Test::WeightCount, 1.0);
-
-    for (const auto learningRate : validRates)
-    {
-        EXPECT_TRUE(denseLayer.optimize(input, learningRate));
-    }
-    for (const auto learningRate : invalidRates)
-    {
-        EXPECT_FALSE(denseLayer.optimize(input, learningRate));
     }
 }
 

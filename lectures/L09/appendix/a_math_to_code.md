@@ -13,11 +13,11 @@ $$s = b + \sum_{i=0}^{j} w_i * x_i, \quad y = \delta(s)$$
 | $b$ | `myBias[i]` |
 | $w_i$ | `myWeights[i][j]` |
 | $x_i$ | `input[j]` |
-| $s$ | `sum` (sparas även i `myPreActivationOutput[i]`, se nedan) |
+| $s$ | `sum` (sparas även i `myPreActOutput[i]`, se nedan) |
 | $\delta(s)$ | `actFuncOutput(myActFunc, sum)` |
 | $y$ | `myOutput[i]` |
 
-`myPreActivationOutput[i]` behövs vid backpropagation nedan, eftersom aktiveringsfunktionens
+`myPreActOutput[i]` behövs vid backpropagation nedan, eftersom aktiveringsfunktionens
 derivata $y_p'$ ska beräknas utifrån $s$ (den viktade summan innan aktiveringsfunktionen
 applicerades); inte utifrån $y$ (utdatan efter aktiveringsfunktionen).
 
@@ -34,7 +34,7 @@ $$\delta = y_{ref} - y_p, \quad \Delta e = \delta * y_p'$$
 | $y_{ref}$ | `reference[i]` |
 | $y_p$ | `myOutput[i]` |
 | $\delta$ | `err` |
-| $y_p'$ | `actFuncDelta(myActFunc, myPreActivationOutput[i])` |
+| $y_p'$ | `actFuncDelta(myActFunc, myPreActOutput[i])` |
 | $\Delta e$ | `myError[i]` |
 
 **Dolt lager:**
@@ -46,7 +46,7 @@ $$\delta = \sum_{i=0}^{j} [\Delta e_i * w_i], \quad \Delta e = \delta * y_p'$$
 | $\Delta e_i$ (nästa lager) | `nextLayer.error()[j]` |
 | $w_i$ (nästa lager) | `nextLayer.weights()[j][i]` |
 | $\delta$ | `err` |
-| $y_p'$ | `actFuncDelta(myActFunc, myPreActivationOutput[i])` |
+| $y_p'$ | `actFuncDelta(myActFunc, myPreActOutput[i])` |
 | $\Delta e$ | `myError[i]` |
 
 ---

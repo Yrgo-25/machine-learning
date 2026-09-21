@@ -18,8 +18,8 @@ testsvit i `exercises/test` (se avsnitt 8):
 * `include/ml/neural_network/` samt `source/ml/neural_network/`: nätverkets interface samt klassen
   `Shallow` (**L07**).
 * `include/ml/dense_layer/dense.h` samt `source/ml/dense_layer/dense.cpp`: klassen `Dense`
-  (**L08**), där `feedforward()`, `backpropagate()` samt `optimize()` fortfarande är
-  platshållare.
+  (**L08**), där `feedforward()`, `backpropagate()` samt `optimize()` än så länge enbart
+  kontrollerar sina argument.
 * `include/ml/types.h`, `source/main.cpp` samt `Makefile`.
 
 Skriv er kod där, eller i er befintliga `ml`-kodbas. Är er egen kod från **L06–L08** inte färdig,
@@ -54,6 +54,7 @@ följande hjälpfunktioner:
         * Använd en switch-sats för att beräkna utdatan beroende på angiven aktiveringsfunktion:
             * `ActFunc::Relu`: Returnera `input` om `input > 0.0`, annars `0.0`.
             * `ActFunc::Tanh`: Returnera `std::tanh(input)` (kräver `#include <cmath>`).
+            * `ActFunc::None`: Returnera `input` oförändrad.
             * Default-fall: Skriv ut felmeddelandet `"Invalid activation function!"` och returnera `0.0`.
     * Ska markeras `noexcept`.
 
@@ -65,6 +66,7 @@ följande hjälpfunktioner:
         * Använd en switch-sats för att beräkna derivatan beroende på angiven aktiveringsfunktion:
             * `ActFunc::Relu`: Returnera `1.0` om `input > 0.0`, annars `0.0`.
             * `ActFunc::Tanh`: Beräkna `const auto tanhOutput = std::tanh(input)` och returnera `1.0 - tanhOutput * tanhOutput`.
+            * `ActFunc::None`: Returnera `1.0`.
             * Default-fall: Skriv ut felmeddelandet `"Invalid activation function!"` och returnera `0.0`.
     * Ska markeras `noexcept`.
 
@@ -84,15 +86,15 @@ Randomisera samtliga biasvärden och vikter:
 
 ### 4. Metoden `feedforward()`
 **Indatakontroll:**
-* Kontrollera att dimensionerna på given input matchar antalet vikter per nod i lagret (`input.size() == weightCount()`).
-* Om dimensionerna inte matchar: skriv ut felmeddelandet `"Input dimension mismatch: expected X, actual: Y!"` och returnera `false` utan att beräkna någonting.
+* Behåll kontrollen från **L08** (`input.size() == weightCount()`) oförändrad, och lägg till
+  beräkningen nedan efter den.
 
 **Beräkning för varje nod:**
 * Iterera genom samtliga noder i lagret med en for-loop: `for (std::size_t i{}; i < nodeCount(); ++i)`.
 * För varje nod `i`, beräkna den viktade summan:
     1. Starta med nodens bias-värde: `auto sum{myBias[i]}`.
     2. Lägg till varje vikt multiplicerat med motsvarande input: `for (std::size_t j{}; j < weightCount(); ++j)` där `sum += myWeights[i][j] * input[j]`.
-* Spara den viktade summan innan aktiveringsfunktionen appliceras: `myPreActivationOutput[i] = sum`.
+* Spara den viktade summan innan aktiveringsfunktionen appliceras: `myPreActOutput[i] = sum`.
   Detta värde behövs av `backpropagate()` nedan för att beräkna aktiveringsfunktionens derivata korrekt.
 * Applicera aktiveringsfunktionen på summan: `myOutput[i] = actFuncOutput(myActFunc, sum)`.
 
@@ -104,15 +106,15 @@ Randomisera samtliga biasvärden och vikter:
 Implementera `backpropagate()` för utgångslager (med referensvärden):
 
 **Indatakontroll:**
-* Kontrollera att dimensionerna på referensvektorns storlek matchar antalet noder (`reference.size() == nodeCount()`).
-* Om dimensionerna inte matchar: skriv ut felmeddelandet `"Output dimension mismatch: expected X, actual: Y!"` och returnera `false` utan att beräkna någonting.
+* Behåll kontrollen från **L08** (`reference.size() == nodeCount()`) oförändrad, och lägg till
+  felberäkningen nedan efter den.
 
 **Felberäkning för varje nod:**
 * Iterera genom samtliga noder i lagret: `for (std::size_t i{}; i < nodeCount(); ++i)`.
 * För varje nod `i`:
     1. Beräkna det råa felet: `const auto err{reference[i] - myOutput[i]}`.
-    2. Beräkna gradientfelet: `myError[i] = err * actFuncDelta(myActFunc, myPreActivationOutput[i])`.
-       **OBS!** Använd `myPreActivationOutput[i]` (den viktade summan innan aktiveringsfunktionen
+    2. Beräkna gradientfelet: `myError[i] = err * actFuncDelta(myActFunc, myPreActOutput[i])`.
+       **OBS!** Använd `myPreActOutput[i]` (den viktade summan innan aktiveringsfunktionen
        applicerades i `feedforward()`), inte `myOutput[i]`. `actFuncDelta()` förväntar sig
        aktiveringsfunktionens *indata*, inte dess utdata - annars blir derivatan felaktig för
        `ActFunc::Tanh` (fungerar av en slump för `ActFunc::Relu`).
@@ -125,8 +127,8 @@ Implementera `backpropagate()` för utgångslager (med referensvärden):
 Implementera `backpropagate()` för dolda lager (med fel och vikter från nästa lager):
 
 **Indatakontroll:**
-* Kontrollera att nästa lagers viktantal matchar detta lagers nodantal (`nextLayer.weightCount() == nodeCount()`).
-* Om dimensionerna inte matchar: skriv ut felmeddelandet `"Layer dimension mismatch: expected X, actual: Y!"` och returnera `false` utan att beräkna någonting.
+* Behåll kontrollen från **L08** (`nextLayer.weightCount() == nodeCount()`) oförändrad, och lägg
+  till felberäkningen nedan efter den.
 
 **Felberäkning för varje nod:**
 * Iterera genom samtliga noder i detta lager: `for (std::size_t i{}; i < nodeCount(); ++i)`.
@@ -134,8 +136,8 @@ Implementera `backpropagate()` för dolda lager (med fel och vikter från nästa
     1. Initiera variabel som lagrar det beräknade råa felet: `double err{}`.
     2. Summera samtliga fel från nästa lager: `for (std::size_t j{}; j < nextLayer.nodeCount(); ++j)`
         * `err += nextLayer.error()[j] * nextLayer.weights()[j][i]`.
-    3. Beräkna gradientfelet: `myError[i] = err * actFuncDelta(myActFunc, myPreActivationOutput[i])`
-       (se OBS-rutan i föregående avsnitt om varför `myPreActivationOutput[i]` används i stället
+    3. Beräkna gradientfelet: `myError[i] = err * actFuncDelta(myActFunc, myPreActOutput[i])`
+       (se OBS-rutan i föregående avsnitt om varför `myPreActOutput[i]` används i stället
        för `myOutput[i]`).
 
 **Returvärde:** `true` när samtliga noders fel har beräknats.
@@ -144,10 +146,8 @@ Implementera `backpropagate()` för dolda lager (med fel och vikter från nästa
 
 ### 7. Metoden `optimize()`
 **Indatakontroll:**
-* Kontrollera att lärhastigheten ligger inom intervallet `(0.0, 1.0)`, samma intervall som stubben kontrollerade i **L06**.
-* Om lärhastigheten är ogiltig: skriv ut felmeddelandet `"Invalid learning rate X!"` och returnera `false` utan att uppdatera någonting.
-* Kontrollera att inputstorleken matchar antalet vikter per nod (`input.size() == weightCount()`).
-* Om dimensionerna inte matchar: skriv ut felmeddelandet `"Input dimension mismatch: expected X, actual: Y!"` och returnera `false` utan att uppdatera någonting.
+* Behåll kontrollerna från **L08** av lärhastigheten och inputstorleken oförändrade, och lägg till
+  parameteruppdateringen nedan efter dem.
 
 **Parameteruppdatering för varje nod:**
 * Iterera genom samtliga noder i lagret: `for (std::size_t i{}; i < nodeCount(); ++i)`.

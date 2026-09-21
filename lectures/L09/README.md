@@ -13,7 +13,7 @@
 ---
 
 ## Instruktioner
-* Fortsätt där vi arbetade senast; implementera de tre metoderna som lämnades tomma förra lektionen.
+* Fortsätt där vi arbetade senast; implementera beräkningarna i de tre metoderna som hittills enbart kontrollerar sina argument.
 * Översätt de matematiska operationerna för feedforward, backpropagation och optimering som vi genomfört för hand till kod: 
     * Se [bilaga A](./appendix/a_math_to_code.md) för en översikt av hur matematiken motsvaras av koden.
     * Se [bilaga B](./appendix/b_exercises.md) för instruktioner gällande implementering av tidigarenämnda metoder.
