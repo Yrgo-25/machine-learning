@@ -346,7 +346,8 @@ TEST(NeuralNetworkShallow, TrainStopsAtFirstFailedLayerCall)
         DenseLayer outputLayer{Test::OutputCount, Test::HiddenCount};
         NeuralNetwork network{hiddenLayer, outputLayer, wideInput, TrainOutput};
 
-        // Expect the hidden layer's optimization to fail.
+        // Expect the hidden layer to reject the input in feedforward(), or in optimize() for a
+        // network that feeds forward via predict() and thereby ignores the feedforward result.
         EXPECT_FALSE(network.train(epochCount, Test::LearningRate));
         EXPECT_EQ(hiddenLayer.feedforwardCount(), one);
     }
