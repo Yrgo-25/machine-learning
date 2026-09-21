@@ -9,7 +9,7 @@
 
 ## Mål med lektionen
 * Ha skapat en skarp underklass som ärver det befintliga dense-lager-interfacet.
-* Ha implementerat samtliga metoder förutom `feedforward()`, `backpropagate()` samt `optimize()`; dessa kommer implementeras under nästa lektion.
+* Ha implementerat samtliga getters, samt argumentkontrollerna i `feedforward()`, `backpropagate()` och `optimize()`; själva beräkningarna implementeras under nästa lektion.
 
 ---
 
@@ -17,7 +17,7 @@
 * Använd er programkod från övningsuppgiften i L06-L07.
 * Läs igenom [bilaga A](./appendix/a_architecture.md) för information om dense-lagrets arkitektur.
 * Skapa en konkret implementation som ärver `ml::dense_layer::Interface`, se [bilaga B](./appendix/b_exercises.md) för detaljerade instruktioner.
-* Implementera samtliga metoder förutom de ovannämnda - låt dessa returnera `false` tills vidare.
+* Implementera samtliga metoder; låt `feedforward()`, `backpropagate()` samt `optimize()` enbart kontrollera sina argument tills vidare.
 * Kontrollera er implementation mot testsviten i [exercises/test](./exercises/test/README.md) tills
   samtliga testfall går igenom. Testsviten innehåller även testerna från **L06–L07**.
 

@@ -12,7 +12,7 @@ Ett dense-lager med `nodeCount` noder och `weightCount` vikter per nod består a
 | Medlemsvariabel | Storlek | Motsvarar (se L05) |
 |---|---|---|
 | `myOutput` | `nodeCount` | $y$ - respektive nods utsignal (efter aktiveringsfunktion) |
-| `myPreActivationOutput` | `nodeCount` | $s$ - respektive nods vägda summa (innan aktiveringsfunktion) |
+| `myPreActOutput` | `nodeCount` | $s$ - respektive nods vägda summa (innan aktiveringsfunktion) |
 | `myError` | `nodeCount` | $\Delta e$ - respektive nods beräknade fel |
 | `myBias` | `nodeCount` | $b$ - respektive nods bias |
 | `myWeights` | `nodeCount` x `weightCount` | $w$ - respektive nods vikter |
@@ -21,7 +21,7 @@ Ett dense-lager med `nodeCount` noder och `weightCount` vikter per nod består a
 ---
 
 ## Aktiveringsfunktion
-Varje lager tilldelas en aktiveringsfunktion av typen `ActFunc` (`Relu` eller `Tanh`) vid konstruktion. Aktiveringsfunktionen tillämpas på samtliga noder i lagret vid feedforward (implementeras i **L09**).
+Varje lager tilldelas en aktiveringsfunktion av typen `ActFunc` (`Relu`, `Tanh` eller `None`) vid konstruktion. Aktiveringsfunktionen tillämpas på samtliga noder i lagret vid feedforward (implementeras i **L09**).
 
 ---
 
