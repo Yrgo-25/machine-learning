@@ -5,7 +5,6 @@
 #include <cstdio>
 
 #include "ml/dense_layer/stub.h"
-#include "ml/neural_network/interface.h"
 #include "ml/neural_network/shallow.h"
 #include "ml/types.h"
 

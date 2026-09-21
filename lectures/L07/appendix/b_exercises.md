@@ -180,7 +180,11 @@ fullständig implementation. Se [bilaga A](./a_training_loop.md) för en genomg�
 struktur.
 
 **Indatakontroll:**
-* Returnera `false` om `epochCount == 0` eller `learningRate <= 0.0 || learningRate >= 1.0`.
+* Returnera `false` om `epochCount == 0`, eller om lärhastigheten inte ligger i intervallet
+  `(0.0, 1.0)`. Formulera det senare som ett krav på att lärhastigheten ligger inom intervallet,
+  dvs. `(0.0 < learningRate) && (1.0 > learningRate)`. Varje jämförelse som involverar NaN är
+  falsk, så denna form avvisar även NaN, vilket den omvända formen
+  `learningRate <= 0.0 || learningRate >= 1.0` inte gör.
 * Träningsdatan behöver inte kontrolleras här. Konstruktorn har redan garanterat minst en
   fullständig träningsuppsättning samt att lagren är rätt kopplade (se avsnitt 4).
 * Som i **L02** och **L04** rapporterar `train()` ogiltiga argument via sitt returvärde. Endast
@@ -193,8 +197,11 @@ struktur.
 * För varje epok, iterera genom samtliga träningsuppsättningar: 
   `for (std::size_t x{}; x < myTrainSetCount; ++x)`.
 * För varje träningsuppsättning `x`, genomför följande tre steg:
-    1. **Feedforward:** Anropa `predict(myTrainInput[x])`. Detta genomför feedforward genom både 
-       det dolda lagret och utgångslagret.
+    1. **Feedforward:**
+        * Mata det dolda lagret med träningsuppsättningens indata: 
+          `myHiddenLayer.feedforward(myTrainInput[x])`.
+        * Mata utgångslagret med det dolda lagrets output: 
+          `myOutputLayer.feedforward(myHiddenLayer.output())`.
     2. **Backpropagation:**
         * Beräkna felet i utgångslagret: `myOutputLayer.backpropagate(myTrainOutput[x])`.
         * Beräkna felet i det dolda lagret utifrån utgångslagrets fel och vikter: 
@@ -204,9 +211,13 @@ struktur.
         * Optimera utgångslagret utifrån det dolda lagrets output: 
           `myOutputLayer.optimize(myHiddenLayer.output(), learningRate)`.
 
-Var och en av de fyra lageranropen ovan returnerar `bool` (se **L06**). Returnera `false` så snart 
+Var och en av de sex lageranropen ovan returnerar `bool` (se **L06**). Returnera `false` så snart 
 något av dem misslyckas: en dimensionsmiss betyder att nätverket är felkopplat, och att fortsätta 
 träna därifrån ger bara meningslösa siffror.
+
+Feedforward-stegets två anrop är desamma som i `predict()`, men `predict()` behöver inte anropas 
+här. Den returnerar utgångslagrets utdata i stället för en `bool`, och kan därför inte rapportera 
+om något av lageranropen misslyckas.
 
 **Returvärde:** `false` vid ogiltiga argument eller ett misslyckat lageranrop, annars `true` efter 
 genomförd träning.

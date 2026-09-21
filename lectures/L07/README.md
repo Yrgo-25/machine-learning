@@ -23,6 +23,7 @@
     * Ni skriver koden själva, enskilt eller i grupp.
     * Kontrollera er implementation mot testsviten i [exercises/test](./exercises/test/README.md)
       tills samtliga testfall går igenom. Testsviten innehåller även stubbtesterna från **L06**.
+    * Lösningsförslag finns [här](./exercises/README.md).
 
 ---
 

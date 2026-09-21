@@ -1,5 +1,5 @@
 # Target application.
-TARGET := dense_layer
+TARGET := neural_network
 
 # C++ compiler.
 CXX_COMPILER := g++

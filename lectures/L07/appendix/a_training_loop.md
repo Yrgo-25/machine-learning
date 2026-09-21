@@ -63,13 +63,14 @@ Ordningen är viktig:
 ---
 
 ## Steg 1 – Feedforward
-Anropa `predict(myTrainInput[x])`. Det genomför feedforward genom båda lagren och returnerar utgångslagrets utsignal.
+Mata lagren framlänges: först det dolda lagret med träningsuppsättningens indata, därefter utgångslagret med det dolda lagrets utsignal.
 
 ```
-predict(input)
-  → myHiddenLayer.feedforward(input)
-  → myOutputLayer.feedforward(myHiddenLayer.output())
+myHiddenLayer.feedforward(myTrainInput[x])
+myOutputLayer.feedforward(myHiddenLayer.output())
 ```
+
+Det är samma två anrop som `predict()` genomför, men `predict()` behöver inte anropas här. Den returnerar utgångslagrets utsignal i stället för en `bool`, och kan därför inte rapportera om något av lageranropen misslyckas.
 
 ---
 
@@ -114,12 +115,13 @@ Dessa tre steg motsvarar direkt teorin från **L05** (se [bilaga A](../../L05/ap
 ---
 
 ## Indatakontroll
-Kontrollera att träning är möjlig innan träningsloopen startar. Skriv ut ett felmeddelande och returnera `false` direkt om något av följande villkor är uppfyllt:
+Kontrollera argumenten innan träningsloopen startar, och returnera `false` direkt om något av följande villkor är uppfyllt:
 
 | Villkor | Förklaring |
 |---|---|
-| `myTrainSetCount == 0` | Träning går inte att genomföra utan träningsdata. |
 | `epochCount == 0` | Träning måste genomföras under minst en epok. |
-| `learningRate <= 0.0 \|\| learningRate >= 1.0` | Ogiltig lärhastighet: måste ligga i intervallet `(0.0, 1.0)`. |
+| `!((0.0 < learningRate) && (1.0 > learningRate))` | Ogiltig lärhastighet: måste ligga i intervallet `(0.0, 1.0)`. Formen avvisar även NaN, eftersom varje jämförelse som involverar NaN är falsk. |
+
+Träningsdatan behöver inte kontrolleras här. Konstruktorn har redan avslutat programmet om det saknas en fullständig träningsuppsättning (`myTrainSetCount == 0`) eller om lagren är felkopplade.
 
 ---
