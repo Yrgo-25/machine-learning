@@ -20,6 +20,7 @@
 * Implementera samtliga metoder; låt `feedforward()`, `backpropagate()` samt `optimize()` enbart kontrollera sina argument tills vidare.
 * Kontrollera er implementation mot testsviten i [exercises/test](./exercises/test/README.md) tills
   samtliga testfall går igenom. Testsviten innehåller även testerna från **L06–L07**.
+* Lösningsförslag finns [här](./exercises/README.md).
 
 ---
 
