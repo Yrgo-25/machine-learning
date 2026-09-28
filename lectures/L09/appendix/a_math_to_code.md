@@ -67,6 +67,10 @@ $$\Delta c_n = \Delta e_n * L, \quad b_n = b_n + \Delta c_n, \quad w_j = w_j + \
 ## Hjälpfunktionerna `initRandom()` och `randomStartVal()`
 Dessa hör inte till någon specifik ekvation, utan hanterar den slumpmässiga initieringen av vikter och bias som beskrivs i **L05**:
 * `initRandom()` säkerställer att slumptalsgeneratorn (`std::rand()`) seedas exakt en gång, oavsett hur många lager som skapas.
-* `randomStartVal()` genererar det faktiska slumptalet i intervallet `[0.0, 1.0]` som varje bias- och viktvärde initieras med. Intervallet är slutet i båda ändar: funktionen dividerar med `RAND_MAX`, så ett utfall på exakt `RAND_MAX` ger exakt `1.0`. Notera att detta är ett medvetet enkelt val för kursen; varje parameter startar positiv, med medelvärdet 0.5. Nätverk i produktion initierar symmetriskt kring noll och skalar efter antalet insignaler (Xavier eller He), vilket spelar störst roll för `Tanh`-lager, eftersom en genomgående positiv start placerar dem direkt i mättnad.
+* `randomStartVal()` genererar det faktiska slumptalet i intervallet `[-1.0, 1.0]` som varje bias- och viktvärde initieras med. Intervallet är slutet i båda ändar: funktionen dividerar först med `RAND_MAX`, vilket ger ett tal i `[0.0, 1.0]`, och skalar sedan om det med `2.0 * x - 1.0`. Ett utfall på exakt `0` ger alltså exakt `-1.0`, och ett utfall på exakt `RAND_MAX` ger exakt `1.0`.
+* Startvärdena är symmetriska kring noll, med medelvärdet 0.0. Det spelar roll av två skäl:
+    * Med enbart positiva startvärden ger en större insignal alltid en större viktad summa i varje ReLU-nod. Ett nätverk som ska lära sig XOR, där `{1, 1}` ska ge `0`, fastnar då, oavsett antal noder.
+    * `Tanh`-lager med genomgående positiva startvärden hamnar direkt i mättnad, där derivatan är nära noll och träningen går långsamt.
+* Notera att detta fortfarande är ett medvetet enkelt val för kursen. Nätverk i produktion skalar dessutom intervallet efter antalet insignaler (Xavier eller He).
 
 ---

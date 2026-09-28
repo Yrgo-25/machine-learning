@@ -40,11 +40,15 @@ följande hjälpfunktioner:
         * Efter initieringen, sätt `initialized = true` så att initiering inte sker nästa gång funktionen anropas.
     * Ska markeras `noexcept`.
 
-* `randomStartVal()`: Funktion för att generera och returnera ett slumptal i intervallet `[0.0, 1.0]`, slutet i båda ändar.
+* `randomStartVal()`: Funktion för att generera och returnera ett slumptal i intervallet `[-1.0, 1.0]`, slutet i båda ändar.
     * **Implementation:**
-        * Generera ett slumptal inom intervallet (0.0, 1.0) genom att kalla på `std::rand()`, som genererar ett slumptal mellan (0, RAND_MAX), och dividera med RAND_MAX.
+        * Generera först ett slumptal i intervallet `[0.0, 1.0]` genom att kalla på `std::rand()`, som genererar ett slumptal i intervallet `[0, RAND_MAX]`, och dividera med `RAND_MAX`.
         * En av operatorerna måste omvandlas till ett flyttal för att inte heltalsdivision ska ske, exempelvis `static_cast<double>(RAND_MAX)`.
+        * Skala sedan om talet till intervallet `[-1.0, 1.0]` genom att multiplicera med `2.0` och subtrahera `1.0`. Ett utfall på `0` ger då `-1.0`, och ett utfall på `RAND_MAX` ger `1.0`.
     * Ska markeras `noexcept`.
+    * **OBS!** Startvärdena måste kunna bli negativa. Startar samtliga vikter och bias positiva, ger
+      insignalen `{1, 1}` alltid den största viktade summan i varje ReLU-nod, och nätverket kan då
+      inte lära sig XOR-mönstret, oavsett antal noder, epoker eller lärhastighet.
 
 * `actFuncOutput()`: Funktion för att beräkna och returnera utdata (flyttal) ur en given aktiveringsfunktion.
     * **Tar emot:**
@@ -182,5 +186,34 @@ XOR-mönstret och kontrollerar att det faktiskt lär sig.
 Felmeddelanden som `Input dimension mismatch` och `Invalid learning rate` skrivs ut av de testfall
 som medvetet anropar lagret med felaktiga argument. De betyder alltså inte att något test har
 misslyckats.
+
+---
+
+### 9. Experimentera med nätverkets parametrar
+När samtliga testfall går igenom, kör demoprogrammet i `exercises/source/main.cpp` via kommandot
+`make` i katalogen `exercises`. Programmet tränar ett nätverk på XOR-mönstret och skriver ut
+prediktionerna före och efter träning. Med startvärdena (3 dolda noder, lärhastighet `0.01` och
+100 epoker) lär sig nätverket sannolikt inte mönstret.
+
+Justera därför följande tre parametrar, en i taget, och studera hur prediktionerna påverkas:
+* **Lärhastigheten** `learningRate` i `trainAndTest()`, exempelvis `0.001`, `0.01`, `0.05`, `0.1`
+  och `0.5`.
+* **Antalet epoker** `epochCount` i `trainAndTest()`, exempelvis `100`, `1000`, `10000` och
+  `100000`.
+* **Antalet dolda noder** `hiddenCount` i `main()`, exempelvis `3`, `6` och `10`.
+
+Kör programmet flera gånger för varje inställning. Startvärdena slumpas, så samma inställning kan
+lyckas vid en körning och misslyckas vid nästa. Notera att slumptalsgeneratorn seedas med aktuell tid
+i sekunder; vänta därför minst en sekund mellan körningarna.
+
+Fundera på följande frågor:
+1. Hur hänger lärhastigheten och antalet epoker ihop? Vad händer om ni halverar lärhastigheten,
+   men behåller antalet epoker?
+2. Vad händer när lärhastigheten blir för hög? Hjälper det då att öka antalet epoker?
+3. Hur påverkar antalet dolda noder hur ofta träningen lyckas?
+
+**Förslag:** Använd till sist 10 dolda noder, lärhastigheten `0.05` och 10 000 epoker. Med dessa
+inställningar bör nätverket lära sig XOR-mönstret vid de allra flesta körningarna, med
+prediktioner nära `0` respektive `1`.
 
 ---
