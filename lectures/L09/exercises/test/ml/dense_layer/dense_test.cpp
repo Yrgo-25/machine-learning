@@ -102,11 +102,21 @@ double tanhDelta(const double input) noexcept
 }
 
 /**
+ * @brief Compute the derivative of ReLU, as specified in appendix B.
+ *
+ * @param[in] input Input value.
+ *
+ * @return 1.0 if the input is greater than zero, otherwise 0.0.
+ */
+double reluDelta(const double input) noexcept { return 0.0 < input ? 1.0 : 0.0; }
+
+/**
  * @brief Recover the bias of a ReLU layer.
  *
- *        A zero input makes each node's weighted sum equal to its bias. The bias starts inside
- *        [0.0, 1.0], and ReLU passes non-negative values through unchanged, so the output is the
- *        bias itself.
+ *        A zero input alone isn't enough, since ReLU clamps a negative bias to zero. Instead, each
+ *        node is fed an input that lifts its weighted sum by a known amount, far above any bias
+ *        this test suite produces. The sum is then positive, ReLU passes it through unchanged, and
+ *        subtracting the lift leaves the bias.
  *
  * @param[in] denseLayer ReLU layer to recover the bias from. Its output is overwritten.
  *
@@ -114,9 +124,25 @@ double tanhDelta(const double input) noexcept
  */
 Matrix1d recoverReluBias(DenseLayer& denseLayer) noexcept
 {
-    const Matrix1d zeroInput(denseLayer.weightCount(), 0.0);
-    denseLayer.feedforward(zeroInput);
-    return denseLayer.output();
+    constexpr double lift{10.0};
+    Matrix1d bias(denseLayer.nodeCount(), 0.0);
+
+    for (std::size_t i{}; i < denseLayer.nodeCount(); ++i)
+    {
+        const auto& nodeWeights = denseLayer.weights()[i];
+        std::size_t largest{};
+
+        // Use the node's largest weight, to keep the input small and the rounding error low.
+        for (std::size_t j{1U}; j < nodeWeights.size(); ++j)
+        {
+            if (std::fabs(nodeWeights[j]) > std::fabs(nodeWeights[largest])) { largest = j; }
+        }
+        Matrix1d input(denseLayer.weightCount(), 0.0);
+        input[largest] = lift / nodeWeights[largest];
+        denseLayer.feedforward(input);
+        bias[i] = denseLayer.output()[i] - lift;
+    }
+    return bias;
 }
 
 /**
@@ -392,7 +418,7 @@ TEST(DenseLayerDense, ClassProperties)
 }
 
 /**
- * @brief Verify that bias and weights start randomized inside the range [0.0, 1.0].
+ * @brief Verify that bias and weights start randomized inside the range [-1.0, 1.0].
  */
 TEST(DenseLayerDense, ConstructedParametersAreRandomized)
 {
@@ -403,7 +429,7 @@ TEST(DenseLayerDense, ConstructedParametersAreRandomized)
     for (const auto value : bias)
     {
         EXPECT_TRUE(std::isfinite(value));
-        EXPECT_TRUE((0.0 <= value) && (1.0 >= value));
+        EXPECT_TRUE((-1.0 <= value) && (1.0 >= value));
         biasVaries = biasVaries || (value != bias[0U]);
     }
 
@@ -411,7 +437,6 @@ TEST(DenseLayerDense, ConstructedParametersAreRandomized)
     // Expect variation: a bias vector left at its initial zeros passes the range check above while
     // quietly dropping one of the layer's two trainable parameters.
     EXPECT_TRUE(biasVaries);
-
     bool weightsVary{false};
 
     for (const auto& nodeWeights : denseLayer.weights())
@@ -419,7 +444,7 @@ TEST(DenseLayerDense, ConstructedParametersAreRandomized)
         for (const auto weight : nodeWeights)
         {
             EXPECT_TRUE(std::isfinite(weight));
-            EXPECT_TRUE((0.0 <= weight) && (1.0 >= weight));
+            EXPECT_TRUE((-1.0 <= weight) && (1.0 >= weight));
             weightsVary = weightsVary || (weight != denseLayer.weights()[0U][0U]);
         }
     }
@@ -427,6 +452,49 @@ TEST(DenseLayerDense, ConstructedParametersAreRandomized)
     // Test that the weights aren't all the same number.
     // Expect variation: nodes that start identical compute identical errors and stay identical.
     EXPECT_TRUE(weightsVary);
+}
+
+/**
+ * @brief Verify that the start values cover both signs, i.e. that the range [0.0, 1.0] has been
+ *        scaled to [-1.0, 1.0].
+ */
+TEST(DenseLayerDense, ConstructedParametersCoverBothSigns)
+{
+    // Use a large layer, so that a correct implementation fails only with a negligible
+    // probability (2 * 0.5^1000 for the weights alone).
+    constexpr std::size_t nodeCount{100U};
+    constexpr std::size_t weightCount{10U};
+
+    DenseLayer denseLayer{nodeCount, weightCount, ActFunc::Relu};
+    const auto bias = recoverReluBias(denseLayer);
+    bool negativeFound{false};
+    bool positiveFound{false};
+
+    for (const auto value : bias)
+    {
+        negativeFound = negativeFound || (0.0 > value);
+        positiveFound = positiveFound || (0.0 < value);
+    }
+
+    // Expect both signs among the bias values: all positive means the scaling is missing.
+    EXPECT_TRUE(negativeFound);
+    EXPECT_TRUE(positiveFound);
+
+    negativeFound = false;
+    positiveFound = false;
+
+    for (const auto& nodeWeights : denseLayer.weights())
+    {
+        for (const auto weight : nodeWeights)
+        {
+            negativeFound = negativeFound || (0.0 > weight);
+            positiveFound = positiveFound || (0.0 < weight);
+        }
+    }
+
+    // Expect both signs among the weights: all positive means the scaling is missing.
+    EXPECT_TRUE(negativeFound);
+    EXPECT_TRUE(positiveFound);
 }
 
 /**
@@ -458,14 +526,14 @@ TEST(DenseLayerDense, FeedforwardComputesWeightedSum)
 {
     const Matrix1d input{2.0, 3.0};
 
-    DenseLayer denseLayer{Test::NodeCount, Test::WeightCount, ActFunc::Relu};
-    const auto bias = recoverReluBias(denseLayer);
+    DenseLayer denseLayer{Test::NodeCount, Test::WeightCount, ActFunc::None};
+    const auto bias = recoverNoneBias(denseLayer);
 
     EXPECT_TRUE(denseLayer.feedforward(input));
 
     // Test each node's output against a sum computed by hand from weights() and the bias.
-    // Expect an exact match: with a positive input every sum is positive, and ReLU passes it
-    // through unchanged.
+    // Expect an exact match: without an activation function the layer outputs the sum itself,
+    // negative sums included.
     for (std::size_t i{}; i < Test::NodeCount; ++i)
     {
         const auto expected = weightedSum(denseLayer.weights(), bias, input, i);
@@ -479,10 +547,10 @@ TEST(DenseLayerDense, FeedforwardComputesWeightedSum)
  */
 TEST(DenseLayerDense, FeedforwardAppliesActivationFunction)
 {
-    // Large negative inputs against non-negative weights drive every sum below zero, so this
-    // exercises ReLU's clamp rather than just its pass-through branch.
+    // Large inputs of opposite sign flip the sign of most sums, so this exercises ReLU's clamp as
+    // well as its pass-through branch.
     const Matrix1d negativeInput{-50.0, -50.0};
-    const Matrix1d positiveInput{2.0, 3.0};
+    const Matrix1d positiveInput{50.0, 50.0};
 
     // Case 1 - ReLU.
     {
@@ -542,20 +610,24 @@ TEST(DenseLayerDense, FeedforwardAppliesActivationFunction)
  */
 TEST(DenseLayerDense, DefaultActivationFunctionIsRelu)
 {
+    // Large inputs of opposite sign flip the sign of most sums, so some sum falls below zero.
     const Matrix1d negativeInput{-50.0, -50.0};
+    const Matrix1d positiveInput{50.0, 50.0};
 
     DenseLayer denseLayer{Test::NodeCount, Test::WeightCount};
     const auto bias = recoverReluBias(denseLayer);
 
-    EXPECT_TRUE(denseLayer.feedforward(negativeInput));
-
-    // Test the output for sums below zero.
-    // Expect ReLU's clamp to zero: Tanh would give negative values, and no activation at all would
-    // give the sums themselves.
-    for (std::size_t i{}; i < Test::NodeCount; ++i)
+    // Expect ReLU's clamp to zero for sums below zero: Tanh would give negative values, and no
+    // activation at all would give the sums themselves.
+    for (const auto& input : {negativeInput, positiveInput})
     {
-        const auto sum = weightedSum(denseLayer.weights(), bias, negativeInput, i);
-        EXPECT_NEAR(denseLayer.output()[i], reluOutput(sum), Test::ExactTolerance);
+        EXPECT_TRUE(denseLayer.feedforward(input));
+
+        for (std::size_t i{}; i < Test::NodeCount; ++i)
+        {
+            const auto sum = weightedSum(denseLayer.weights(), bias, input, i);
+            EXPECT_NEAR(denseLayer.output()[i], reluOutput(sum), Test::ExactTolerance);
+        }
     }
 }
 
@@ -612,17 +684,20 @@ TEST(DenseLayerDense, BackpropagateOutputLayerComputesError)
     const Matrix1d reference{1.0, 0.0, -1.0};
 
     DenseLayer denseLayer{Test::NodeCount, Test::WeightCount, ActFunc::Relu};
+    const auto bias = recoverReluBias(denseLayer);
+
     EXPECT_TRUE(denseLayer.feedforward(input));
     const auto output = denseLayer.output();
 
     EXPECT_TRUE(denseLayer.backpropagate(reference));
 
-    // Test each node's error against the raw deviation.
-    // Expect an exact match: the positive input keeps every sum above zero, where ReLU's derivative
-    // is 1.0, so nothing scales the error.
+    // Test each node's error against the deviation, scaled by ReLU's derivative.
+    // Expect an exact match: the derivative is 1.0 for sums above zero and 0.0 otherwise.
     for (std::size_t i{}; i < Test::NodeCount; ++i)
     {
-        EXPECT_NEAR(denseLayer.error()[i], reference[i] - output[i], Test::ExactTolerance);
+        const auto sum      = weightedSum(denseLayer.weights(), bias, input, i);
+        const auto expected = (reference[i] - output[i]) * reluDelta(sum);
+        EXPECT_NEAR(denseLayer.error()[i], expected, Test::ExactTolerance);
     }
 }
 
@@ -659,20 +734,25 @@ TEST(DenseLayerDense, BackpropagateUsesPreActivationDerivative)
  */
 TEST(DenseLayerDense, BackpropagateNoneUsesUnitDerivative)
 {
-    // Large negative inputs against non-negative weights drive the sums below zero, where ReLU's
-    // derivative is 0.0, so a None layer that falls back on ReLU's derivative doesn't pass.
-    const Matrix1d input{-50.0, -50.0};
+    // Large inputs of opposite sign flip the sign of most sums, so some sum falls below zero, where
+    // ReLU's derivative is 0.0. A None layer that falls back on ReLU's derivative doesn't pass.
+    const Matrix1d negativeInput{-50.0, -50.0};
+    const Matrix1d positiveInput{50.0, 50.0};
     const Matrix1d reference{1.0, 0.0, -1.0};
 
     DenseLayer denseLayer{Test::NodeCount, Test::WeightCount, ActFunc::None};
-    EXPECT_TRUE(denseLayer.feedforward(input));
-    const auto output = denseLayer.output();
 
-    EXPECT_TRUE(denseLayer.backpropagate(reference));
-
-    for (std::size_t i{}; i < Test::NodeCount; ++i)
+    for (const auto& input : {negativeInput, positiveInput})
     {
-        EXPECT_NEAR(denseLayer.error()[i], reference[i] - output[i], Test::ExactTolerance);
+        EXPECT_TRUE(denseLayer.feedforward(input));
+        const auto output = denseLayer.output();
+
+        EXPECT_TRUE(denseLayer.backpropagate(reference));
+
+        for (std::size_t i{}; i < Test::NodeCount; ++i)
+        {
+            EXPECT_NEAR(denseLayer.error()[i], reference[i] - output[i], Test::ExactTolerance);
+        }
     }
 }
 
