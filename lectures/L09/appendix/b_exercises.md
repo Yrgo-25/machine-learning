@@ -45,7 +45,7 @@ följande hjälpfunktioner:
         * Generera först ett slumptal i intervallet `[0.0, 1.0]` genom att kalla på `std::rand()`, som genererar ett slumptal i intervallet `[0, RAND_MAX]`, och dividera med `RAND_MAX`.
         * En av operatorerna måste omvandlas till ett flyttal för att inte heltalsdivision ska ske, exempelvis `static_cast<double>(RAND_MAX)`.
         * Skala sedan om talet till intervallet `[-1.0, 1.0]` genom att multiplicera med `2.0` och subtrahera `1.0`. Ett utfall på `0` ger då `-1.0`, och ett utfall på `RAND_MAX` ger `1.0`.
-    * Ska markeras `noexcept`.
+    * Ska markeras `[[nodiscard]]` samt `noexcept`.
     * **OBS!** Startvärdena måste kunna bli negativa. Startar samtliga vikter och bias positiva, ger
       insignalen `{1, 1}` alltid den största viktade summan i varje ReLU-nod, och nätverket kan då
       inte lära sig XOR-mönstret, oavsett antal noder, epoker eller lärhastighet.
@@ -58,9 +58,9 @@ följande hjälpfunktioner:
         * Använd en switch-sats för att beräkna utdatan beroende på angiven aktiveringsfunktion:
             * `ActFunc::Relu`: Returnera `input` om `input > 0.0`, annars `0.0`.
             * `ActFunc::Tanh`: Returnera `std::tanh(input)` (kräver `#include <cmath>`).
-            * `ActFunc::None`: Returnera `input` oförändrad.
-            * Default-fall: Skriv ut felmeddelandet `"Invalid activation function!"` och returnera `0.0`.
-    * Ska markeras `noexcept`.
+            * Default-fall: Returnera `input` oförändrad. Grenen täcker `ActFunc::None`, som är
+            identitet, och ger samtidigt ett definierat beteende för ett ogiltigt värde.
+    * Ska markeras `[[nodiscard]]` samt `noexcept`.
 
 * `actFuncDelta()`: Funktion för att beräkna och returnera derivatan (flyttal) av en given aktiveringsfunktion.
     * **Tar emot:**
@@ -70,9 +70,9 @@ följande hjälpfunktioner:
         * Använd en switch-sats för att beräkna derivatan beroende på angiven aktiveringsfunktion:
             * `ActFunc::Relu`: Returnera `1.0` om `input > 0.0`, annars `0.0`.
             * `ActFunc::Tanh`: Beräkna `const auto tanhOutput = std::tanh(input)` och returnera `1.0 - tanhOutput * tanhOutput`.
-            * `ActFunc::None`: Returnera `1.0`.
-            * Default-fall: Skriv ut felmeddelandet `"Invalid activation function!"` och returnera `0.0`.
-    * Ska markeras `noexcept`.
+            * Default-fall: Returnera `1.0`. Grenen täcker `ActFunc::None`, vars derivata är
+            `1.0`, och ger samtidigt ett definierat beteende för ett ogiltigt värde.
+    * Ska markeras `[[nodiscard]]` samt `noexcept`.
 
 ---
 

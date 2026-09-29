@@ -51,8 +51,8 @@ void printPredictions(const char* header, ml::neural_network::Interface& network
 // -----------------------------------------------------------------------------
 bool trainAndTest(ml::neural_network::Shallow& network, const ml::Matrix2d& trainInput) noexcept
 {
-    constexpr std::size_t epochCount{100U};
-    constexpr double learningRate{0.01};
+    constexpr std::size_t epochCount{10000U};
+    constexpr double learningRate{0.05};
 
     // Predict before training.
     printSeparator();
@@ -78,7 +78,7 @@ bool trainAndTest(ml::neural_network::Shallow& network, const ml::Matrix2d& trai
 int main()
 {
     constexpr std::size_t inputCount{2U};
-    constexpr std::size_t hiddenCount{3U};
+    constexpr std::size_t hiddenCount{10U};
     constexpr std::size_t outputCount{1U};
 
     // Training data: the 2-bit XOR pattern.

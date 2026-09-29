@@ -116,6 +116,8 @@ public:
     Dense& operator=(Dense&&)      = delete; // No move assignment.
 
 private:
+    void initParams() noexcept;
+
     /** Layer weights, holding matrices of weights per node. */
     Matrix2d myWeights;
 

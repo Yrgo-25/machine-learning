@@ -20,6 +20,7 @@
 * Kontrollera er implementation mot testsviten i [exercises/test](./exercises/test/README.md) tills
   samtliga testfall går igenom. Testsviten innehåller även testerna från **L06–L08**.
 * Testa implementationen genom att träna det neurala nätverk på befintlig träningsdata, justera vid behov antalet genomförda epoker och/eller lärhastigheten.
+* Lösningsförslag finns [här](./exercises/README.md).
 
 ---
 
