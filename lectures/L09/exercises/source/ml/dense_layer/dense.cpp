@@ -49,6 +49,27 @@ void initRandom() noexcept
             return input;
     }
 }
+
+// -----------------------------------------------------------------------------
+[[nodiscard]] double actFuncDelta(const ActFunc actFunc, const double input) noexcept
+{
+    switch (actFunc)
+    {
+        case ActFunc::Relu:
+        {
+            return 0.0 < input ? 1.0 : 0.0;
+        }
+        case ActFunc::Tanh:
+        {
+            const auto out = std::tanh(input);
+            return 1.0 - out * out;
+        }
+        default:
+        {
+            return 1.0;
+        }
+    }
+}
 } // namespace
 
 // -----------------------------------------------------------------------------
@@ -117,8 +138,25 @@ bool Dense::feedforward(const Matrix1d& input) noexcept
     {
         std::fprintf(stderr, "Input dimension mismatch: expected %zu, actual: %zu!\n",
                      weightCount(), input.size());
+        return false;
     }
-    return match;
+
+    // Compute new outputs for each node in the layer, one by one.
+    for (std::size_t i{}; i < nodeCount(); ++i)
+    {
+        // Add the bias first.
+        auto sum = myBias[i];
+
+        // Add the contribution from the inputs, multiply with the corresponding weights.
+        for (std::size_t j{}; j < weightCount(); ++j)
+        {
+            sum += myWeights[i][j] * input[j];
+        }
+        // Store the layer output, pre- and post activation function filtering.
+        myPreActOutput[i] = sum;
+        myOutput[i]       = actFuncOutput(myActFunc, sum);
+    }
+    return true;
 }
 
 // -----------------------------------------------------------------------------
@@ -130,8 +168,16 @@ bool Dense::backpropagate(const Matrix1d& reference) noexcept
     {
         std::fprintf(stderr, "Output dimension mismatch: expected %zu, actual: %zu!\n", nodeCount(),
                      reference.size());
+        return false;
     }
-    return match;
+
+    for (std::size_t i{}; i < nodeCount(); ++i)
+    {
+        const auto error = reference[i] - myOutput[i];
+        const auto delta = actFuncDelta(myActFunc, myPreActOutput[i]);
+        myError[i]       = error * delta;
+    }
+    return true;
 }
 
 // -----------------------------------------------------------------------------
@@ -143,8 +189,21 @@ bool Dense::backpropagate(const Interface& nextLayer) noexcept
     {
         std::fprintf(stderr, "Layer dimension mismatch: expected %zu, actual: %zu!\n", nodeCount(),
                      nextLayer.weightCount());
+        return false;
     }
-    return match;
+
+    for (std::size_t i{}; i < nodeCount(); ++i)
+    {
+        double sum{};
+
+        for (std::size_t j{}; j < nextLayer.nodeCount(); ++j)
+        {
+            sum += nextLayer.error()[j] * nextLayer.weights()[j][i];
+        }
+        const auto delta = actFuncDelta(myActFunc, myPreActOutput[i]);
+        myError[i]       = sum * delta;
+    }
+    return true;
 }
 
 // -----------------------------------------------------------------------------
