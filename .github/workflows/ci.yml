@@ -20,15 +20,18 @@ jobs:
       - name: Build
         run: make build
 
-  # Check code formatting, run on latest Ubuntu runner.
+  # Check code formatting. The Ubuntu image and the clang-format version are both pinned, since
+  # different clang-format versions format the same code differently.
   format-check:
     name: Check formatting
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    env:
+      CLANG_FORMAT: clang-format-18
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
       - name: Install clang-format
-        run: sudo apt-get update && sudo apt-get install -y clang-format
+        run: sudo apt-get update && sudo apt-get install -y clang-format-18
       - name: Set up Python
         uses: actions/setup-python@v5
         with:

@@ -11,6 +11,10 @@ set -euo pipefail
 # Root directory.
 ROOT_DIR="$(dirname "${BASH_SOURCE[0]}")/.."
 
+# The clang-format binary to use. Override it to pin a specific version, for example
+# CLANG_FORMAT=clang-format-18, so that every machine formats the code identically.
+CLANG_FORMAT="${CLANG_FORMAT:-clang-format}"
+
 ################################################################################
 # Terminate the script if clang-format is not installed.
 # Globals:
@@ -19,9 +23,9 @@ ROOT_DIR="$(dirname "${BASH_SOURCE[0]}")/.."
 #   None
 ################################################################################
 check_clang_format() {
-    if ! command -v clang-format &> /dev/null
+    if ! command -v "$CLANG_FORMAT" &> /dev/null
     then
-        echo "error: clang-format not found. Install it, e.g. 'sudo apt -y install clang-format'." >&2
+        echo "error: $CLANG_FORMAT not found. Install it, e.g. 'sudo apt -y install clang-format-18'." >&2
         exit 1
     fi
 }
@@ -80,13 +84,13 @@ format_files() {
     # Format selected files.
     if [[ "${arg:-}" == "--check" ]]
     then
-        clang-format --dry-run --Werror "${files[@]}"
+        "$CLANG_FORMAT" --dry-run --Werror "${files[@]}"
     else
         local count=0
         for file in "${files[@]}"
         do
             before=$(md5sum "$file")
-            clang-format -i "$file"
+            "$CLANG_FORMAT" -i "$file"
             after=$(md5sum "$file")
             if [[ "$before" != "$after" ]]
             then

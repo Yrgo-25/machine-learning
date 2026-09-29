@@ -35,10 +35,7 @@ Cnn::~Cnn() noexcept = default;
 std::size_t Cnn::inputSize() const noexcept { return myConvLayers[0U]->inputSize(); }
 
 // -----------------------------------------------------------------------------
-std::size_t Cnn::outputSize() const noexcept
-{
-    return myDenseLayers[0U]->outputSize();
-}
+std::size_t Cnn::outputSize() const noexcept { return myDenseLayers[0U]->outputSize(); }
 
 // -----------------------------------------------------------------------------
 const Matrix1d& Cnn::predict(const Matrix2d& input) noexcept

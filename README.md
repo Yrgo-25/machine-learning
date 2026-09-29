@@ -73,7 +73,7 @@ Innan skriptet körs behöver `clang-format` samt `black` finnas installerade oc
 
 ```bash
 sudo apt -y update
-sudo apt -y install clang-format
+sudo apt -y install clang-format-18
 ```
 
 `black` installeras via `requirements.txt`:
