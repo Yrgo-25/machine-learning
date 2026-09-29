@@ -222,7 +222,19 @@ bool Dense::optimize(const Matrix1d& input, const double learningRate) noexcept
     {
         std::fprintf(stderr, "Input dimension mismatch: expected %zu, actual: %zu!\n",
                      weightCount(), input.size());
+        return false;
     }
-    return match;
+
+    for (std::size_t i{}; i < nodeCount(); ++i)
+    {
+        const auto changeRate = myError[i] * learningRate;
+        myBias[i] += changeRate;
+
+        for (std::size_t j{}; j < weightCount(); ++j)
+        {
+            myWeights[i][j] += changeRate * input[j];
+        }
+    }
+    return true;
 }
 } // namespace ml::dense_layer
