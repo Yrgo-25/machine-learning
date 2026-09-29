@@ -37,8 +37,7 @@ std::size_t Cnn::inputSize() const noexcept { return myConvLayers[0U]->inputSize
 // -----------------------------------------------------------------------------
 std::size_t Cnn::outputSize() const noexcept
 {
-    const std::size_t last{myDenseLayers.size() - 1U};
-    return myDenseLayers[last]->outputSize();
+    return myDenseLayers[0U]->outputSize();
 }
 
 // -----------------------------------------------------------------------------
@@ -62,8 +61,6 @@ bool Cnn::train(const Matrix3d& trainIn, const Matrix2d& trainOut, const std::si
     else if (0U == epochCount) { return false; }
 
     const auto setCount = std::min(trainIn.size(), trainOut.size());
-
-    if (0U == setCount) { return false; }
 
     TrainOrderList trainOrder{createTrainOrderList(setCount)};
 

@@ -34,8 +34,7 @@ ActFuncPtr Factory::actFunc(const act_func::Type type) noexcept
 ConvLayerPtr Factory::convLayer(const std::size_t inputSize, const std::size_t kernelSize,
                                 const act_func::Type actFunc) noexcept
 {
-    ///! @todo Replace conv_layer::ConvStub with conv_layer::Conv when implemented.
-    return std::make_unique<conv_layer::ConvStub>(inputSize, kernelSize, actFunc);
+    return std::make_unique<conv_layer::Conv>(inputSize, kernelSize, actFunc);
 }
 
 // -----------------------------------------------------------------------------
@@ -48,15 +47,13 @@ DenseLayerPtr Factory::denseLayer(const std::size_t inputSize, const std::size_t
 // -----------------------------------------------------------------------------
 FlattenLayerPtr Factory::flattenLayer(const std::size_t inputSize) noexcept
 {
-    ///! @todo Replace flatten_layer::Stub with flatten_layer::Flatten when implemented.
-    return std::make_unique<flatten_layer::Stub>(inputSize);
+    return std::make_unique<flatten_layer::Flatten>(inputSize);
 }
 
 // -----------------------------------------------------------------------------
 ConvLayerPtr Factory::maxPoolLayer(const std::size_t inputSize, const std::size_t poolSize) noexcept
 {
-    ///! @todo Replace conv_layer::MaxPoolStub with conv_layer::MaxPool when implemented.
-    return std::make_unique<conv_layer::MaxPoolStub>(inputSize, poolSize);
+    return std::make_unique<conv_layer::MaxPool>(inputSize, poolSize);
 }
 
 // -----------------------------------------------------------------------------

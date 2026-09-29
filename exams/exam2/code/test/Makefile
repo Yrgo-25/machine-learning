@@ -30,7 +30,9 @@ ML_FILES := $(ML_SRC)/cnn/cnn.cpp \
 
 # Test files.
 TEST_FILES := main.cpp \
+              ml/conv_layer/test_conv.cpp \
               ml/dense_layer/test_dense.cpp \
+              ml/flatten_layer/test_flatten.cpp \
               ml/cnn/test_cnn.cpp \
 
 # All source files.

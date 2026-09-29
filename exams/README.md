@@ -22,6 +22,8 @@ Båda proven är gemensamma med kursen **Mjuk- och hårdvarutestning** och betyg
   första praktiska provet, men i form av felsökning: en färdig implementation innehåller sex
   planterade buggar som ska hittas med enhets- och komponenttester och rättas.
   Lösningsförslag finns [här](./exam1/practice_exam1_solution.md).
-* [Övningstentamen 2](./exam2/practice_exam2.md) (konvolutionella neurala nätverk) visar vad som förväntas inför det andra praktiska provet.
+* [Hemtentamen 2](./exam2/home_exam2.md) (konvolutionella neurala nätverk) genomförs på egen hand:
+  en färdig CNN-implementation innehåller åtta planterade buggar som ska hittas med enhets- och
+  komponenttester och rättas.
 
 ---

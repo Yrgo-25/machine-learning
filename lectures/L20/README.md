@@ -1,7 +1,7 @@
-# L20 - Övningstentamen och kursavslut
+# L20 - Hemtentamen och kursavslut
 
 ## Dagordning
-* Genomförande av övningstentamen inför kommande praktiska prov.
+* Genomgång av hemtentamen 2, samt tid att påbörja den.
 * Kursavslut.
 
 ---
@@ -9,7 +9,7 @@
 ## Mål med lektionen
 * Visa praktisk förståelse för konvolutionella neurala nätverk (kernels, padding, pooling-lager
   med mera).
-* Identifiera eventuella kunskapsluckor inför det skarpa provet.
+* Kunna hitta fel i en färdig CNN-implementation med hjälp av enhets- och komponenttester.
 
 ---
 
@@ -21,11 +21,11 @@
 ## Instruktioner
 
 ### Förberedelse
-* Läs igenom [övningstentamen](../../exams/exam2/practice_exam2.md).
+* Läs igenom [hemtentamen](../../exams/exam2/home_exam2.md).
 
 ### Under lektionen
-* Genomför övningstentamen på egen hand, som förberedelse inför det skarpa provet.
-* Jämför era svar mot facit i efterhand och stäm av eventuella osäkerheter.
+* Gå igenom kodbasen och uppgiftsbeskrivningen i helklass.
+* Påbörja arbetet på egen hand, och ställ frågor om något är oklart.
 
 ---
 
