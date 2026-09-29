@@ -35,6 +35,13 @@ public:
     [[nodiscard]] virtual const Matrix1d& error() const noexcept = 0;
 
     /**
+     * @brief Get layer bias values.
+     *
+     * @return Layer bias values.
+     */
+    [[nodiscard]] virtual const Matrix1d& bias() const noexcept = 0;
+
+    /**
      * @brief Get layer weights.
      *
      * @return Weights for each node in the layer.

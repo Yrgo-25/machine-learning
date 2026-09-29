@@ -16,3 +16,14 @@ make
 
 ---
 
+## Exempeltester
+Katalogen innehåller sex exempeltester som samtliga går igenom: tre för `Dense` och tre för
+`Shallow`. De visar mönstren ni bygger vidare på, bland annat hur ett förväntat värde räknas fram
+ur lagrets egna vikter och hur `Stub::setOutput()` används, och de avslöjar ingen av de planterade
+buggarna.
+
+Felmeddelanden som `Feedforward failed due to dimension mismatch` skrivs ut av de testfall som
+medvetet anropar med felaktiga argument. De betyder alltså inte att ett test har misslyckats.
+
+---
+

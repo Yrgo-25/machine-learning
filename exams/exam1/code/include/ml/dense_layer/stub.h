@@ -56,14 +56,21 @@ public:
      *
      * @return Layer output.
      */
-    const Matrix1d& output() const noexcept override { return myOutput; }
+    [[nodiscard]] const Matrix1d& output() const noexcept override { return myOutput; }
 
     /**
      * @brief Get computed error values.
      *
      * @return Computed error values for each node in the layer.
      */
-    const Matrix1d& error() const noexcept override { return myError; }
+    [[nodiscard]] const Matrix1d& error() const noexcept override { return myError; }
+
+    /**
+     * @brief Get layer bias values.
+     *
+     * @return Layer bias values.
+     */
+    [[nodiscard]] const Matrix1d& bias() const noexcept override { return myError; }
 
     /**
      * @brief Get layer weights.
@@ -77,7 +84,7 @@ public:
      *
      * @return Number of nodes in this layer.
      */
-    std::uint16_t nodeCount() const noexcept override
+    [[nodiscard]] std::uint16_t nodeCount() const noexcept override
     {
         return static_cast<std::uint16_t>(myOutput.size());
     }
@@ -87,7 +94,7 @@ public:
      *
      * @return Number of weights per node in this layer.
      */
-    std::uint16_t weightCount() const noexcept override
+    [[nodiscard]] std::uint16_t weightCount() const noexcept override
     {
         const auto count = !myWeights.empty() ? myWeights[0U].size() : 0U;
         return static_cast<std::uint16_t>(count);

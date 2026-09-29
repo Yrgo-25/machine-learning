@@ -2,8 +2,8 @@
 
 ## Information
 Denna tentamen är gemensam för kurserna **Maskininlärning** och **Mjuk- och hårdvarutestning**:
-* Uppgift 1–7 examinerar maskininlärning.
-* Uppgift 8–10 examinerar testning. 
+* Uppgift 3 och 5 examinerar maskininlärning.
+* Uppgift 1, 2 och 4 examinerar testning.
 
 Betyg sätts separat per kurs enligt poänggränserna nedan.
 
@@ -14,7 +14,7 @@ Betyg sätts separat per kurs enligt poänggränserna nedan.
 
 ### Poänggränser och betygsnivåer
 
-**Maskininlärning (uppgift 1–7):**
+**Maskininlärning (uppgift 3 och 5):**
 Totalt: 30 poäng.
 
 Betygsgränser:
@@ -25,7 +25,7 @@ Bidrag till kursens slutpoäng:
 * Betyget **G** ger 1 poäng till kurssammanställningen.
 * Betyget **VG** ger 2 poäng till kurssammanställningen.
 
-**Mjuk- och hårdvarutestning (uppgift 8–10):**
+**Mjuk- och hårdvarutestning (uppgift 1, 2 och 4):**
 Totalt: 20 poäng.
 
 Betygsgränser:
@@ -34,126 +34,162 @@ Betygsgränser:
 
 Bidrag till kursens slutpoäng: se separat information för kursen Mjuk- och hårdvarutestning.
 
+---
+
+## Uppgiften i korthet
+Katalogen [code](./code) innehåller ett komplett neuralt nätverk av samma typ som ni byggde under
+**L06-L09**: klassen `Dense`, nätverket `Shallow`, stubben `Stub` samt hjälpfunktionerna i
+`ml/helpers.h`. Koden kompilerar och kör, men **sex buggar har medvetet planterats**:
+* **Fyra i `Dense`**, i [source/ml/dense_layer/dense.cpp](./code/source/ml/dense_layer/dense.cpp).
+* **Två i `Shallow`**, i
+  [source/ml/neural_network/shallow.cpp](./code/source/ml/neural_network/shallow.cpp).
+
+Er uppgift är att skriva tester för koden, hitta buggarna via de testfall som misslyckas, och rätta
+dem:
+
+1. Skriv vanliga testfall för lagrets och nätverkets beteende, ett per beräkning. Ett test av
+   `feedforward()` räknar exempelvis ut den förväntade utdatan ur lagrets egna `bias()` och
+   `weights()`, och jämför mot det lagret faktiskt gav.
+2. Kör testerna. De som misslyckas pekar ut var buggarna sitter.
+3. Rätta buggen.
+4. Kör testerna igen; nu ska de gå igenom.
+
+Ni skriver alltså inga testfall som är särskilt konstruerade för en viss bugg, utan helt vanliga
+testfall som kontrollerar att koden gör det den ska. Det räcker med ett testfall per beräkning.
+
 ### Viktigt
-* Ett komplett neuralt nätverk (inklusive `ml::neural_network::Shallow`) tillhandahålls i katalogen [code](./code/source/main.cpp). 
-* Er uppgift är enbart att skapa och implementera klassen `Dense` i filerna [ml/dense_layer/dense.h](./code/include/ml/dense_layer/dense.h) samt [ml/dense_layer/dense.cpp](./code/source/ml/dense_layer/dense.cpp); resten av kodbasen ska inte behöva ändras, förutom att ni behöver kommentera ut `-DSTUB`
-* Hjälpfunktionerna `ml::actFuncOutput()` samt `ml::actFuncDelta()` finns redan tillgängliga och stödjer båda aktiveringsfunktionerna `ActFunc::Relu` samt `ActFunc::Tanh`, ni behöver alltså inte implementera dessa själva.
+* Övriga filer är korrekta och ska inte ändras: `interface.h` (båda), `stub.h`, `types.h`,
+  `helpers.h`, `helpers.cpp`, `main.cpp` samt makefilerna. Deklarationerna i
+  [dense.h](./code/include/ml/dense_layer/dense.h) är också korrekta; samtliga fyra buggar i
+  `Dense` ligger i implementationsfilen.
+* Hjälpfunktionerna `ml::actFuncOutput()` och `ml::actFuncDelta()` är korrekta och stödjer
+  `ActFunc::Relu`, `ActFunc::Tanh` samt `ActFunc::None`.
+* Bygg och kör demoprogrammet med `make` i katalogen [code](./code). Programmet tränar ett
+  2-10-1-nätverk på XOR-mönstret och skriver ut prediktionerna. Lägg till `-DSTUB` i makefilens
+  `CXX_FLAGS` för att bygga demot med stubbar i stället.
+* Bygg och kör testerna med `make` i katalogen [code/test](./code/test). Där finns sex
+  exempeltester som samtliga går igenom; de visar mönstret ni bygger vidare på och avslöjar inte
+  någon av buggarna.
+* Felmeddelanden som `Feedforward failed due to dimension mismatch` skrivs ut av de testfall som
+  medvetet anropar med felaktiga argument. De betyder alltså inte att ett test har misslyckats.
 * Koden behöver ej kommenteras.
-* I givet testprogram används dense-lagerstubbar i form av `ml::dense_layer::Stub`. För att använda er implementation `ml::dense_layer::Dense` i stället, kommentera ut `-DSTUB` ur [Makefile](./code/Makefile), såsom visas nedan:
 
-```bash
-CXX_FLAGS := -Wall -Werror -std=c++17 -Iinclude #-DSTUB
-```
-
-* Uppgift 8–10 (testning) använder testramverket `yrgo::test` (se [libs/test](../../libs/test/README.md) för `TEST()`, `EXPECT_*` med mera). Testerna ligger i katalogen [test](./code/test), som har en egen makefil; bygg och kör dem genom att köra `make` i den katalogen.
-* `ml::dense_layer::Stub` har en metod `setOutput()` som låter er sätta lagrets utdata manuellt; använd denna för att skriva komponenttester för `Shallow` med kända, kontrollerade lagerutdata.
-
----
-
-## G-uppgifter
-
-### **1.** Klassen `Dense` (4p)
-Skapa en klass döpt `Dense` i namnrymden `ml::dense_layer` som ärver (publikt) interfacet `ml::dense_layer::Interface`:
-* Klassen ska inte kunna ärvas vidare.
-* Konstruktorn ska inte kunna anropas implicit (t.ex. vid en typkonvertering).
-* Objekt av klassen ska varken kunna skapas utan angivna argument, kopieras eller flyttas.
-* Konstruktorn ska skriva ut ett felmeddelande och anropa `std::terminate()` om `nodeCount` eller `weightCount` är 0.
+### Två tips på vägen
+* **Lagrets parametrar går att läsa av.** `bias()` ger biasvärdena och `weights()` vikterna, så ett
+  förväntat värde kan räknas ut direkt ur lagret. Aktiveringsfunktionen `ActFunc::None` släpper
+  dessutom igenom den viktade summan orörd, vilket gör utdatan enkel att jämföra mot. Testfallet
+  `Dense.FeedforwardComputesWeightedSum` visar hela mönstret.
+* **Demoprogrammet räcker inte som facit.** Startvärdena slumpas, så en körning kan misslyckas
+  även med helt korrekt kod, och lyckas trots en bugg. Använd programmet för att se symptom, och
+  tester för att avgöra vad som faktiskt är fel.
 
 ---
 
-### **2.** Feedforward (4p)
-Implementera metoden `feedforward()` i klassen `Dense`. Metoden ska:
-* Genomföra den fullständiga feedforward-beräkningen och lagra resultatet internt så att det returneras korrekt via `output()`.
-* Fungera korrekt oavsett vald aktiveringsfunktion (`ActFunc::Relu` eller `ActFunc::Tanh`).
-* Skriva ut ett felmeddelande och returnera `false` om dimensionen på `input` inte matchar antalet vikter per nod (annars `true`).
+## Uppgifter
+
+### **1.** Unit-tester för `Dense`: beräkningarna (8p · Testning)
+Skriv ett testfall per beräkning i `Dense`, alltså fyra stycken (2p styck), i
+[test/ml/dense_layer/test_dense.cpp](./code/test/ml/dense_layer/test_dense.cpp) med ramverket
+`yrgo::test` (se [libs/test](../../libs/test/README.md)). Räkna i varje testfall ut det förväntade
+värdet ur lagrets egna parametrar, som `bias()` och `weights()` ger, och jämför med vad lagret
+faktiskt gav:
+* **`feedforward()`:** utdatan ska vara aktiveringsfunktionen tillämpad på
+  `bias() + summan av weights() * input`, nod för nod.
+* **`backpropagate()` (utgångslager):** felet ska vara referensvärdet minus utdatan, skalat med
+  aktiveringsfunktionens derivata.
+* **`backpropagate()` (dolt lager):** felet ska vara summan av nästa lagers fel gånger vikterna som
+  förbinder noderna, skalat med aktiveringsfunktionens derivata.
+* **`optimize()`:** biasvärdet ska ha ökat med felet gånger lärhastigheten, och varje vikt med
+  samma tal gånger sin egen insignal. Läs av `bias()` och `weights()` både före och efter anropet.
+
+Två saker påverkar om ett testfall faktiskt fångar det det ska:
+* Välj aktiveringsfunktion med omsorg. `ActFunc::None` ger derivatan `1.0`, vilket döljer om
+  derivatan saknas i beräkningen.
+* Välj indata med olika värden, exempelvis `{2.0, -1.0}`. Med `{1.0, 1.0}` blir flera felaktiga
+  formler omöjliga att skilja från de korrekta.
 
 ---
 
-### **3.** Feedforward för hand (4p)
-Ni har följande enkla neurala nätverk:
+### **2.** Unit-tester för `Dense`: argumentkontroller (6p · Testning)
+Varje beräkningsmetod i `Dense` ska avvisa ogiltiga argument och returnera `false`, och returnera
+`true` när argumenten är giltiga. Exempeltestet `Dense.FeedforwardChecksInputSize` visar mönstret
+för `feedforward()`. Skriv motsvarande testfall för de övriga metoderna:
+* **`backpropagate()`, båda överlagringarna (3p):** fel antal referensvärden respektive ett nästa
+  lager vars viktantal inte matchar detta lagers nodantal ska ge `false`, och rätt dimensioner
+  `true`.
+* **`optimize()` (3p):** en lärhastighet utanför `(0.0, 1.0)` samt fel dimension på indatan ska ge
+  `false`, och giltiga argument `true`.
 
-![](./images/network1.png)
-
-* Ingångslager: 2 insignaler `x1`, `x2`.
-* Dolt lager: 2 noder `y1`, `y2`.
-* Utgångslager: 1 nod `y3`.
-* Aktiveringsfunktion: **ReLU** i samtliga noder.
-
-**Parametrar:**
-```
-b1 = 0.1,  b2 = 0.4,  b3 = 0.2
-w1 = 0.3,  w2 = 0.7  (till y1, från x1 respektive x2)
-w3 = 0.5,  w4 = 0.2  (till y2, från x1 respektive x2)
-w5 = 0.6,  w6 = 0.9  (till y3, från y1 respektive y2)
-```
-
-**Indata:** `x1 = 1`, `x2 = 0`.
-
-Beräkna, med visad uträkning, värdena på `y1`, `y2` samt `y3` via feedforward.
+Kontrollerna i `Dense` är korrekt implementerade i den utlämnade koden, så dessa testfall ska gå
+igenom direkt. De examinerar att ni kan testa en metods kontrakt, inte att ni hittar buggar.
 
 ---
 
-### **4.** Aktiveringsfunktioner (2p)
-Besvara följande kortfattat:
-* Förklara vad det innebär att gradienter kan "försvinna" (*vanishing gradients*) under träning, och varför ReLU minskar risken för detta jämfört med sigmoid.
-* En utgångsnod ska predicera ett värde i intervallet `[-1, 1]`. Vilken aktiveringsfunktion lämpar sig bättre för detta – ReLU eller Tanh – och varför?
+### **3.** Rätta buggarna i `Dense` (20p · Maskininlärning)
+Buggarna ligger en i vardera `feedforward()`, `backpropagate()` (utgångslager), `backpropagate()`
+(dolt lager) samt `optimize()`. Rätta samtliga (5p styck), så att testfallen från uppgift 1 går
+igenom.
 
 ---
 
-## VG-uppgifter
-
-### **5.** Backpropagation och optimering (8p)
-Implementera metoderna `backpropagate()` (två överlagringar) samt `optimize()` i klassen `Dense`. Samtliga metoder ska fungera korrekt oavsett vald aktiveringsfunktion (`ActFunc::Relu` eller `ActFunc::Tanh`).
-
-**`backpropagate(output)`** (utgångslager):
-* Ska beräkna felet för varje nod utifrån referensvärdena i `output` och lagra det internt, så att det kan hämtas via `error()` samt användas av `optimize()`.
-* Skriv ut ett felmeddelande och returnera `false` om dimensionen på `output` inte matchar antalet noder i lagret (annars `true`).
-
-**`backpropagate(nextLayer)`** (dolt lager):
-* Ska beräkna felet för varje nod med hjälp av felet och vikterna i nästa lager (`nextLayer.error()` samt `nextLayer.weights()`) och lagra det internt.
-* Skriv ut ett felmeddelande och returnera `false` om `nextLayer.weightCount()` inte matchar antalet noder i detta lager (annars `true`).
-
-**`optimize()`**:
-* Ska uppdatera samtliga bias- och viktvärden i lagret utifrån felet som beräknades av `backpropagate()`.
-* Skriv ut ett felmeddelande och returnera `false` om `learningRate` ligger utanför intervallet `(0.0, 1.0)`, eller om dimensionen på `input` inte matchar antalet vikter per nod (annars `true`).
+### **4.** Komponenttester för `Shallow` (6p · Testning)
+Skriv två testfall (3p styck) i
+[test/ml/neural_network/test_shallow.cpp](./code/test/ml/neural_network/test_shallow.cpp), med två
+`ml::dense_layer::Stub` som dolt lager respektive utgångslager. En stubb har känd utdata, som ni
+sätter själva via `setOutput()`, medan ett `Dense`-lager har slumpade startvärden:
+* **`predict()`:** ska returnera exakt den utdata som utgångslagrets stubb har satts till, oavsett
+  indata.
+* **`train()`:** ska följa kontraktet i
+  [shallow.h](./code/include/ml/neural_network/shallow.h), dvs. returnera `false` vid ogiltiga
+  argument, som noll epoker eller en lärhastighet utanför `(0.0, 1.0)`, och `true` vid giltiga.
 
 ---
 
-### **6.** Backpropagation och optimering för hand (6p)
-Utgå från nätverket och de framräknade värdena `y1`, `y2` samt `y3` från uppgift 3. Referensvärdet för denna träningsuppsättning är `y_ref = 1`. Lärhastigheten `LR = 0.1`.
+### **5.** Rätta buggarna i `Shallow` (10p · Maskininlärning)
+Rätta båda buggarna (5p styck), så att testfallen från uppgift 4 går igenom.
 
-Beräkna, med visad uträkning:
-* Felet samt uppdaterat värde för `b3`, `w5` samt `w6` (utgångslagret).
-* Felet för `y1` samt `y2`, och uppdaterat värde för `b1`, `w1` samt `b2` (det dolda lagret).
+**Ledtråd:** båda buggarna syns i testfallen från uppgift 4, utan en enda `Dense`-instans.
 
 ---
 
-### **7.** Träning i praktiken (2p)
-Besvara följande kortfattat:
-* Varför är det fördelaktigt att randomisera ordningen på träningsuppsättningarna inför varje ny epok?
-* Vad är fördelen med en adaptiv lärhastighet jämfört med en fast lärhastighet?
+## Redovisning
+Lämna in:
+* Testfallen i [code/test](./code/test).
+* Den rättade koden i `dense.cpp` samt `shallow.cpp`.
+
+När samtliga sex buggar är rättade ska testerna gå igenom, och demoprogrammet ska vid de flesta
+körningar prediktera XOR-mönstret, dvs. `{0.0}`, `{1.0}`, `{1.0}` och `{0.0}`.
 
 ---
 
-## Testuppgifter
+## Självkontroll
+Hur vet ni att ni har hittat alla sex? Nedan följer sex frågor att ställa till koden, en per bugg,
+i samma ordning som buggarna ligger i uppgift 3 och 5. Frågorna säger inte vad som är fel, utan
+vilken egenskap som ska gälla; svarar er kod `ja` på samtliga, och testerna som visar det går
+igenom, har ni hittat samtliga buggar.
 
-### **8.** Unit-tester för `Dense` (8p)
-Skriv unit-tester för klassen `Dense` med `yrgo::test`-ramverket (se [libs/test](../../libs/test/README.md)). Lägg testerna i en egen testsvit, t.ex. `TEST(Dense, ...)`, och verifiera bland annat:
-* Att konstruktorn skapar ett lager med korrekt `nodeCount()` och `weightCount()`.
-* Att `feedforward()`, `backpropagate()` (båda överlagringarna) samt `optimize()` returnerar `false` vid ogiltig indata (felaktig dimension, ogiltig lärhastighet) och `true` vid giltig indata.
+1. Ger två noder i samma lager olika utdata för samma indata, när deras vikter skiljer sig åt?
+2. Blir felet i ett utgångslager positivt när prediktionen är för låg, och negativt när den är för
+   hög? Använd `ActFunc::None` eller `ActFunc::Tanh`, vars derivata alltid är positiv.
+3. Blir felet noll för en nod i ett dolt lager vars ReLU-utdata är noll, även när nästa lager har
+   ett fel skilt från noll?
+4. Lämnas en vikt vars insignal var noll orörd av `optimize()`, medan vikten bredvid, med
+   insignalen 2.0, ändras dubbelt så mycket som biasvärdet?
+5. Innehåller prediktionen från `predict()` lika många värden som utgångslagret har noder?
+6. Avvisar `train()` en lärhastighet på exakt `1.0`?
+
+Utöver detta finns två kontroller av helheten:
+* Kör `make check` i katalogen [code](./code). Demoprogrammet körs då fem gånger med en sekunds
+  paus emellan, så att startvärdena hinner slumpas om. Med samtliga buggar rättade ska
+  prediktionerna bestå av ett enda värde och följa XOR-mönstret vid de flesta körningarna.
+* En korrekt implementation sänker felet för en och samma träningsuppsättning när den tränas om
+  och om igen. Ett litet testfall som tränar ett nätverk i några hundra epoker och jämför felet
+  före och efter är ofta det som fäller den sista kvarvarande buggen.
 
 ---
 
-### **9.** Komponenttester för `Shallow` (8p)
-Skriv komponenttester för `ml::neural_network::Shallow` med `yrgo::test`-ramverket, där ni använder två `ml::dense_layer::Stub`-instanser (inte `Dense`) som dolt lager respektive utgångslager. Verifiera bland annat:
-* Att `predict()` returnerar exakt den utdata som utgångslagrets stubb är satt till via `setOutput()`, oavsett given indata.
-* Lämpliga edge cases, t.ex. saknad träningsdata eller ogiltiga parametrar till `train()`.
-
----
-
-### **10.** Testteori (4p)
-Besvara följande kortfattat:
-* Vad är skillnaden mellan ett unit-test och ett komponenttest, och varför används dense-lagerstubbar i komponenttesterna för `Shallow` i stället för riktiga `Dense`-instanser?
-* Varför är det viktigt att `Dense` och `Shallow` inte kastar undantag vid ogiltig indata, med tanke på hur `yrgo::test` rapporterar testfel?
+## Lösningsförslag
+Lösningsförslag finns [här](./practice_exam1_solution.md), med samtliga sex buggar, rättningarna
+samt det testfall som fångar respektive bugg. **OBS!** Läs det först efter ert eget försök.
 
 ---

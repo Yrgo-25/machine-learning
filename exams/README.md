@@ -18,7 +18,10 @@ Båda proven är gemensamma med kursen **Mjuk- och hårdvarutestning** och betyg
 ---
 
 ## Övningstentor
-* [Övningstentamen 1](./exam1/practice_exam1.md) (neurala nätverk) visar vad som förväntas inför det första praktiska provet.
+* [Övningstentamen 1](./exam1/practice_exam1.md) (neurala nätverk) övar samma kunskaper som det
+  första praktiska provet, men i form av felsökning: en färdig implementation innehåller sex
+  planterade buggar som ska hittas med enhets- och komponenttester och rättas.
+  Lösningsförslag finns [här](./exam1/practice_exam1_solution.md).
 * [Övningstentamen 2](./exam2/practice_exam2.md) (konvolutionella neurala nätverk) visar vad som förväntas inför det andra praktiska provet.
 
 ---

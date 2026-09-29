@@ -58,11 +58,11 @@ void testNetwork(ml::INeuralNetwork& network, const ml::Matrix2d& inputs) noexce
 int main()
 {
     constexpr std::uint16_t inputCount{2U};
-    constexpr std::uint16_t hiddenCount{3U};
+    constexpr std::uint16_t hiddenCount{10U};
     constexpr std::uint16_t outputCount{1U};
 
     constexpr std::uint32_t epochCount{20000U};
-    constexpr double learningRate{0.1};
+    constexpr double learningRate{0.05};
 
     const ml::Matrix2d trainIn{{0.0, 0.0}, {0.0, 1.0}, {1.0, 0.0}, {1.0, 1.0}};
     const ml::Matrix2d trainOut{{0.0}, {1.0}, {1.0}, {0.0}};

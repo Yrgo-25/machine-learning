@@ -8,7 +8,7 @@
 ## Mål med lektionen
 * Visa praktisk förståelse för feedforward, backpropagation samt optimering i dense-lager.
 * Visa förståelse för aktiveringsfunktioner och val av dessa.
-* Kunna träna ett litet neuralt nätverk för hand.
+* Kunna hitta fel i en färdig implementation med hjälp av enhets- och komponenttester.
 * Identifiera eventuella kunskapsluckor inför det skarpa provet.
 
 ---

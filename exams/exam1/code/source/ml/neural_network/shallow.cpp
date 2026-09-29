@@ -106,7 +106,7 @@ std::uint16_t Shallow::outputSize() const noexcept { return myOutputLayer.nodeCo
 const Matrix1d& Shallow::predict(const Matrix1d& input) noexcept
 {
     feedforward(input);
-    return myOutputLayer.output();
+    return myHiddenLayer.output();
 }
 
 // -----------------------------------------------------------------------------
