@@ -1,8 +1,11 @@
 /**
  * @file Real dense layer implementation details.
  */
+#include <cmath>
 #include <cstddef>
 #include <cstdio>
+#include <cstdlib>
+#include <ctime>
 #include <exception>
 
 #include "ml/dense_layer/dense.h"
@@ -10,6 +13,44 @@
 
 namespace ml::dense_layer
 {
+namespace
+{
+// -----------------------------------------------------------------------------
+void initRandom() noexcept
+{
+    static bool initialized{false};
+
+    // Skip initialization if already done.
+    if (initialized) { return; }
+
+    // Initialize the random generator, use current time as seed.
+    std::srand(std::time(nullptr));
+    initialized = true;
+}
+
+// -----------------------------------------------------------------------------
+[[nodiscard]] double randomStartVal() noexcept
+{
+    constexpr double max{static_cast<double>(RAND_MAX)}; // 65535.0
+    const auto ratio = rand() / max;                     // 0.0 - 1.0.
+    return 2.0 * ratio - 1.0;                            // -1.0 - 1.0.
+}
+
+// -----------------------------------------------------------------------------
+[[nodiscard]] double actFuncOutput(const ActFunc actFunc, const double input) noexcept
+{
+    switch (actFunc)
+    {
+        case ActFunc::Relu:
+            return 0.0 < input ? input : 0.0;
+        case ActFunc::Tanh:
+            return std::tanh(input);
+        default:
+            return input;
+    }
+}
+} // namespace
+
 // -----------------------------------------------------------------------------
 Dense::Dense(const std::size_t nodeCount, const std::size_t weightCount,
              const ActFunc actFunc) noexcept
@@ -30,11 +71,26 @@ Dense::Dense(const std::size_t nodeCount, const std::size_t weightCount,
         std::fprintf(stderr, "Weight count cannot be 0!\n");
         std::terminate();
     }
+
+    // Set size of matrices, all values start at 0.0.
     myWeights.resize(nodeCount, Matrix1d(weightCount));
     myOutput.resize(nodeCount);
     myPreActOutput.resize(nodeCount);
     myBias.resize(nodeCount);
     myError.resize(nodeCount);
+
+    // Randomize trainable parameters, use range [-1.0, 1.0].
+    initRandom();
+
+    for (std::size_t i{}; i < nodeCount; ++i)
+    {
+        myBias[i] = randomStartVal();
+
+        for (std::size_t j{}; j < weightCount; ++j)
+        {
+            myWeights[i][j] = randomStartVal();
+        }
+    }
 }
 
 // -----------------------------------------------------------------------------
