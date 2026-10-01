@@ -25,9 +25,14 @@
 * Läs igenom [övningstentamen](../../exams/exam1/practice_exam1.md).
 
 ### Under lektionen
-* Övningstentamen genomförs i helklass:
-    * Ni kommer få 5-10 minuter att lösa respektive uppgift individuellt.
-    * Därefter demonstreras en lösning live i helklass.
+* Övningstentamen genomförs på egen hand under lektionstid, enskilt eller i par.
+* [Lösningsförslaget](../../exams/exam1/practice_exam1_solution.md) är tillgängligt hela tiden:
+    * Gör ert eget försök först, och stäm sedan av en uppgift i taget.
+    * Varje avsnitt i lösningsförslaget behandlar en enda bugg, så övriga buggar spolieras inte av
+      att ni läser ett avsnitt.
+    * Vill ni kontrollera er kod utan att läsa facit, använd frågorna under *Självkontroll* i
+      [övningstentamen](../../exams/exam1/practice_exam1.md).
+* Jag finns tillgänglig för frågor under tiden; det som visar sig svårt tas gemensamt i helklass.
 
 ---
 

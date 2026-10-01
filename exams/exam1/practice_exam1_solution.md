@@ -1,23 +1,14 @@
 # Övningstentamen 1 - Lösningsförslag
 Lösningsförslag till [övningstentamen 1](./practice_exam1.md).
 
-**OBS!** Dokumentet avslöjar samtliga sex buggar. Läs det först när ni har gjort ett eget försök,
-eller använd det för att kontrollera era rättningar i efterhand.
+**OBS!** Dokumentet avslöjar samtliga sex buggar. Gör ert eget försök först.
 
----
-
-## De sex buggarna
-
-| Nr | Fil | Rad | Bugg |
-|---|---|---|---|
-| 1 | `source/ml/dense_layer/dense.cpp` | 85 | `feedforward()` läser vikterna ur nod 0 för samtliga noder. |
-| 2 | `source/ml/dense_layer/dense.cpp` | 111 | `backpropagate()` (utgångslager) beräknar avvikelsen med omvänt tecken. |
-| 3 | `source/ml/dense_layer/dense.cpp` | 142 | `backpropagate()` (dolt lager) skalar inte felet med aktiveringsfunktionens derivata. |
-| 4 | `source/ml/dense_layer/dense.cpp` | 177 | `optimize()` justerar varje vikt utan att skala med viktens egen insignal. |
-| 5 | `source/ml/neural_network/shallow.cpp` | 109 | `predict()` returnerar det dolda lagrets utdata i stället för utgångslagrets. |
-| 6 | `source/ml/neural_network/shallow.cpp` | 67 | `train()` saknar den övre gränsen för lärhastigheten. |
-
-Radnumren avser den utlämnade koden, innan någon rättning har gjorts.
+Dokumentet är upplagt så att ni kan stämma av en bugg i taget: varje avsnitt nedan är fristående
+och innehåller en bugg, dess rättning och det testfall som fångar den. Läs enbart avsnittet för den
+metod ni arbetar med, så spolieras inte de övriga. Vill ni kontrollera er kod utan att läsa facit
+alls, använd i stället frågorna under *Självkontroll* i
+[övningstentamen](./practice_exam1.md). En sammanställning av samtliga sex buggar finns sist i
+dokumentet.
 
 ---
 
@@ -393,6 +384,21 @@ TEST(Dense, OptimizeChecksArguments)
 Godkänn även andra uppdelningar, exempelvis ett testfall per kontroll, så länge samtliga fyra
 metoders avvisande och accepterande vägar täcks. `Shallow::train()` saknar däremot en av sina
 kontroller; den hör till bugg 6 och bedöms där.
+
+---
+
+## Sammanställning av buggarna
+
+| Nr | Fil | Rad | Bugg |
+|---|---|---|---|
+| 1 | `source/ml/dense_layer/dense.cpp` | 85 | `feedforward()` läser vikterna ur nod 0 för samtliga noder. |
+| 2 | `source/ml/dense_layer/dense.cpp` | 111 | `backpropagate()` (utgångslager) beräknar avvikelsen med omvänt tecken. |
+| 3 | `source/ml/dense_layer/dense.cpp` | 142 | `backpropagate()` (dolt lager) skalar inte felet med aktiveringsfunktionens derivata. |
+| 4 | `source/ml/dense_layer/dense.cpp` | 177 | `optimize()` justerar varje vikt utan att skala med viktens egen insignal. |
+| 5 | `source/ml/neural_network/shallow.cpp` | 109 | `predict()` returnerar det dolda lagrets utdata i stället för utgångslagrets. |
+| 6 | `source/ml/neural_network/shallow.cpp` | 67 | `train()` saknar den övre gränsen för lärhastigheten. |
+
+Radnumren avser den utlämnade koden, innan någon rättning har gjorts.
 
 ---
 
