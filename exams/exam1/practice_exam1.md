@@ -1,48 +1,32 @@
 # Övningstentamen 1 - Neurala nätverk och testning
 
 ## Information
-Denna tentamen är gemensam för kurserna **Maskininlärning** och **Mjuk- och hårdvarutestning**:
-* Uppgift 3 och 5 examinerar maskininlärning.
-* Uppgift 1, 2 och 4 examinerar testning.
-
-Betyg sätts separat per kurs enligt poänggränserna nedan.
+Denna tentamen är gemensam för kurserna **Maskininlärning** och **Mjuk- och hårdvarutestning**, och
+betygssätts separat per kurs. Varje uppgift är märkt med vilken kurs den examinerar samt med **G**
+eller **VG**, precis som på det skarpa provet; se *Betygsättning* nedan.
 
 ### Hjälpmedel
-* En handskriven A4 med anteckningar, båda sidorna.
-    * **Rekommenderat innehåll:** algoritmerna för dense-lagret och det neurala nätverket, dvs.
-      stegen i feedforward, backpropagation och optimering, formlerna från **L05**, derivatorna för
-      aktiveringsfunktionerna, samt flödesscheman över hur lagren och nätverket hänger ihop. Det är
-      den sortens anteckningar provet belönar: ni behöver veta vad koden *borde* göra för att se
-      att den inte gör det.
-    * **Kod är tillåten i övrigt**, exempelvis hur ett testfall skrivs med `yrgo::test`, syntaxen
-      för `EXPECT_*` eller hur en `std::vector` deklareras.
-    * **Otillåtet:** avskrivna metoder ur kursens `ml`-kodbas, exempelvis `feedforward()`,
-      `backpropagate()` eller `optimize()` ur `Dense` eller `Shallow`. Skriv algoritmen, inte
-      implementationen.
-* Dator med textredigerare (t.ex. Visual Studio Code med IntelliSense).
-* Kodkomplettering, AI-verktyg och internetåtkomst är inte tillåtna.
+* Kurslitteratur, egna anteckningar, föreläsningsmaterial, kursens repo samt internet.
+* AI-verktyg får användas. Koden ska dock skrivas av er själva, även när ni hämtar kodsnuttar från
+  ett AI-verktyg.
+* Ni ska kunna förklara varje testfall ni skriver samt varje rättning ni gör. Det skarpa provet
+  redovisas muntligt, så det är den förståelsen övningen tränar.
 
-### Poänggränser och betygsnivåer
+Det skarpa provet har samma form som denna övningstentamen, men innehåller därutöver en bugg i
+hjälpfunktionerna, tester för samtliga aktiveringsfunktioner samt en utbyggnad av kodbasen med en
+aktiveringsfunktion till.
 
-**Maskininlärning (uppgift 3 och 5):**
-Totalt: 30 poäng.
+### Betygsättning
+Betyget avgörs helt av vilka uppgifter ni genomför:
 
-Betygsgränser:
-* **G:** Minst 14 poäng.
-* **VG:** Minst 23 poäng.
+| Kurs | **G** | **VG** |
+|---|---|---|
+| Maskininlärning | Uppgift 3 | Uppgift 3 och 5 |
+| Mjuk- och hårdvarutestning | Uppgift 1, 2 och 4 | Uppgift 1, 2, 4, 6 och 7 |
 
-Bidrag till kursens slutpoäng:
-* Betyget **G** ger 1 poäng till kurssammanställningen.
-* Betyget **VG** ger 2 poäng till kurssammanställningen.
-
-**Mjuk- och hårdvarutestning (uppgift 1, 2 och 4):**
-Totalt: 20 poäng.
-
-Betygsgränser:
-* **G:** Minst 10 poäng.
-* **VG:** Minst 16 poäng.
-
-Bidrag till kursens slutpoäng: se separat information för kursen Mjuk- och hårdvarutestning.
+Ni väljer alltså själva nivå: gör G-uppgifterna för ett G, gör samtliga för ett VG. En uppgift
+räknas som genomförd när den är klar och fungerar, dvs. testfallen går igenom och rättningarna är
+på plats. Det skarpa provet betygssätts på samma sätt.
 
 ---
 
@@ -97,8 +81,8 @@ testfall som kontrollerar att koden gör det den ska. Det räcker med ett testfa
 
 ## Uppgifter
 
-### **1.** Unit-tester för `Dense`: beräkningarna (8p · Testning)
-Skriv ett testfall per beräkning i `Dense`, alltså fyra stycken (2p styck), i
+### **1.** Unit-tester för `Dense`: beräkningarna (Testning, G)
+Skriv ett testfall per beräkning i `Dense`, alltså fyra stycken, i
 [test/ml/dense_layer/test_dense.cpp](./code/test/ml/dense_layer/test_dense.cpp) med ramverket
 `yrgo::test` (se [libs/test](../../libs/test/README.md)). Räkna i varje testfall ut det förväntade
 värdet ur lagrets egna parametrar, som `bias()` och `weights()` ger, och jämför med vad lagret
@@ -120,14 +104,14 @@ Två saker påverkar om ett testfall faktiskt fångar det det ska:
 
 ---
 
-### **2.** Unit-tester för `Dense`: argumentkontroller (6p · Testning)
+### **2.** Unit-tester för `Dense`: argumentkontroller (Testning, G)
 Varje beräkningsmetod i `Dense` ska avvisa ogiltiga argument och returnera `false`, och returnera
 `true` när argumenten är giltiga. Exempeltestet `Dense.FeedforwardChecksInputSize` visar mönstret
 för `feedforward()`. Skriv motsvarande testfall för de övriga metoderna:
-* **`backpropagate()`, båda överlagringarna (3p):** fel antal referensvärden respektive ett nästa
+* **`backpropagate()`, båda överlagringarna:** fel antal referensvärden respektive ett nästa
   lager vars viktantal inte matchar detta lagers nodantal ska ge `false`, och rätt dimensioner
   `true`.
-* **`optimize()` (3p):** en lärhastighet utanför `(0.0, 1.0)` samt fel dimension på indatan ska ge
+* **`optimize()`:** en lärhastighet utanför `(0.0, 1.0)` samt fel dimension på indatan ska ge
   `false`, och giltiga argument `true`.
 
 Kontrollerna i `Dense` är korrekt implementerade i den utlämnade koden, så dessa testfall ska gå
@@ -135,15 +119,15 @@ igenom direkt. De examinerar att ni kan testa en metods kontrakt, inte att ni hi
 
 ---
 
-### **3.** Rätta buggarna i `Dense` (20p · Maskininlärning)
+### **3.** Rätta buggarna i `Dense` (Maskininlärning, G)
 Buggarna ligger en i vardera `feedforward()`, `backpropagate()` (utgångslager), `backpropagate()`
-(dolt lager) samt `optimize()`. Rätta samtliga (5p styck), så att testfallen från uppgift 1 går
+(dolt lager) samt `optimize()`. Rätta samtliga, så att testfallen från uppgift 1 och 2 går
 igenom.
 
 ---
 
-### **4.** Komponenttester för `Shallow` (6p · Testning)
-Skriv två testfall (3p styck) i
+### **4.** Komponenttester för `Shallow` (Testning, G)
+Skriv två testfall i
 [test/ml/neural_network/test_shallow.cpp](./code/test/ml/neural_network/test_shallow.cpp), med två
 `ml::dense_layer::Stub` som dolt lager respektive utgångslager. En stubb har känd utdata, som ni
 sätter själva via `setOutput()`, medan ett `Dense`-lager har slumpade startvärden:
@@ -155,10 +139,29 @@ sätter själva via `setOutput()`, medan ett `Dense`-lager har slumpade startvä
 
 ---
 
-### **5.** Rätta buggarna i `Shallow` (10p · Maskininlärning)
-Rätta båda buggarna (5p styck), så att testfallen från uppgift 4 går igenom.
+### **5.** Rätta buggarna i `Shallow` (Maskininlärning, VG)
+Rätta båda buggarna, så att testfallen från uppgift 4 går igenom.
 
 **Ledtråd:** båda buggarna syns i testfallen från uppgift 4, utan en enda `Dense`-instans.
+
+---
+
+### **6.** Edge-case-tester (Testning, VG)
+Skriv testfall för de gränsfall kodbasen ska klara:
+* Ett `Dense`-lager med en enda nod och en enda vikt, dvs. `Dense{1U, 1U}`: dimensionerna ska
+  stämma, och beräkningarna ska fungera precis som för ett större lager.
+* Träningsdata där antalet indata och antalet utdata skiljer sig åt: `Shallow::train()` ska då
+  använda det minsta antalet, och varken krascha eller läsa utanför datan.
+
+---
+
+### **7.** Konvergenstest (Testning, VG)
+Skriv ett testfall som tränar ett nätverk på XOR-mönstret och kontrollerar att träningen faktiskt
+förbättrar nätverket, exempelvis genom att jämföra medelabsolutfelet före och efter träningen.
+
+Startvärdena slumpas, så ett testfall som kräver att nätverket lär sig mönstret *varje* gång
+kommer att misslyckas ibland, även med helt korrekt kod. Ett test som bara fungerar ibland är värre
+än inget test alls, så formulera kravet så att det håller för samtliga körningar.
 
 ---
 

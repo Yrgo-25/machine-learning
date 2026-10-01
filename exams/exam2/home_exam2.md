@@ -2,10 +2,8 @@
 
 ## Information
 Denna hemtentamen är gemensam för kurserna **Maskininlärning** och **Mjuk- och hårdvarutestning**:
-* Uppgift 3 och 5 examinerar maskininlärning.
-* Uppgift 1, 2 och 4 examinerar testning.
-
-Betyg sätts separat per kurs enligt poänggränserna nedan.
+Varje uppgift är märkt med vilken kurs den examinerar samt med **G** eller **VG**; betyget sätts
+separat per kurs, se *Betygsättning* nedan.
 
 ### Hjälpmedel
 * Kurslitteratur, egna anteckningar, föreläsningsmaterial samt internet.
@@ -13,27 +11,18 @@ Betyg sätts separat per kurs enligt poänggränserna nedan.
   AI-verktyg; skriv alltså in koden själva i stället för att klistra in den rakt av.
 * Ni ska kunna förklara varje testfall ni lämnar in samt varje rättning ni gör.
 
-### Poänggränser och betygsnivåer
+### Betygsättning
+Betyget avgörs helt av vilka uppgifter ni genomför:
 
-**Maskininlärning (uppgift 3 och 5):**
-Totalt: 28 poäng.
+| Kurs | **G** | **VG** |
+|---|---|---|
+| Maskininlärning | Uppgift 3 | Uppgift 3 och 5 |
+| Mjuk- och hårdvarutestning | Uppgift 1 och 2 | Uppgift 1, 2 och 4 |
 
-Betygsgränser:
-* **G:** Minst 14 poäng.
-* **VG:** Minst 23 poäng.
-
-Bidrag till kursens slutpoäng:
-* Betyget **G** ger 1 poäng till kurssammanställningen.
-* Betyget **VG** ger 2 poäng till kurssammanställningen.
-
-**Mjuk- och hårdvarutestning (uppgift 1, 2 och 4):**
-Totalt: 20 poäng.
-
-Betygsgränser:
-* **G:** Minst 10 poäng.
-* **VG:** Minst 16 poäng.
-
-Bidrag till kursens slutpoäng: se separat information för kursen Mjuk- och hårdvarutestning.
+Ni väljer alltså själva nivå: gör G-uppgifterna för ett G, gör samtliga för ett VG. En uppgift
+räknas som genomförd när den är klar och fungerar, dvs. testfallen går igenom, rättningarna är på
+plats, och ni kan förklara dem vid redovisningen. Halvfärdiga uppgifter ger inget betyg; välj nivå
+och gör den klar.
 
 ---
 
@@ -121,14 +110,14 @@ Buggarna går bara att hitta om ni vet vad koden borde göra. Följande gäller 
 
 ## Uppgifter
 
-### **1.** Unit-tester för lagren: beräkningarna (12p · Testning)
+### **1.** Unit-tester för lagren: beräkningarna (Testning, G)
 Skriv testfall som kontrollerar att lagren räknar rätt, i katalogen [code/test](./code/test).
 Räkna ut det förväntade värdet i testet, och jämför med vad lagret gav:
-* **`Conv` (4p):** `feedforward()` mot `bias()` plus kernelns bidrag, samt `backpropagate()` och
+* **`Conv`:** `feedforward()` mot `bias()` plus kernelns bidrag, samt `backpropagate()` och
   `optimize()`, exempelvis genom att läsa av `bias()` före och efter optimeringen.
-* **`MaxPool` (4p):** `feedforward()` mot blockens maxvärden, och `backpropagate()` mot
+* **`MaxPool`:** `feedforward()` mot blockens maxvärden, och `backpropagate()` mot
   gradienterna på maxvärdenas positioner.
-* **`Flatten` (4p):** `feedforward()` och `backpropagate()` mot den radvisa ordningen.
+* **`Flatten`:** `feedforward()` och `backpropagate()` mot den radvisa ordningen.
 
 Använd `act_func::Type::None` i `Conv` när ni vill jämföra mot den viktade summan utan filtrering,
 och en indata där värdena skiljer sig åt, exempelvis en stigande talföljd. Symmetrisk indata döljer
@@ -136,7 +125,7 @@ flera av felen.
 
 ---
 
-### **2.** Unit-tester för lagren: dimensionskontroller (4p · Testning)
+### **2.** Unit-tester för lagren: dimensionskontroller (Testning, G)
 Samtliga lager ska avvisa indata och gradienter av fel storlek och returnera `false`, och returnera
 `true` för rätt storlek. Exempeltesterna `Conv.FeedforwardChecksInputSize` samt
 `Flatten.FeedforwardChecksInputSize` visar mönstret. Skriv motsvarande testfall för `backpropagate()`
@@ -144,15 +133,12 @@ i samtliga tre lager.
 
 ---
 
-### **3.** Rätta buggarna i lagren (20p · Maskininlärning)
-Rätta de sex buggarna i lagren, så att testfallen från uppgift 1 och 2 går igenom:
-* **`Conv`:** 4p per bugg.
-* **`MaxPool`:** 3p per bugg.
-* **`Flatten`:** 3p per bugg.
+### **3.** Rätta buggarna i lagren (Maskininlärning, G)
+Rätta de sex buggarna i lagren, så att testfallen från uppgift 1 och 2 går igenom.
 
 ---
 
-### **4.** Komponenttester för `Cnn` (4p · Testning)
+### **4.** Komponenttester för `Cnn` (Testning, VG)
 Skriv komponenttester för `ml::cnn::Cnn` med `factory::Stub`, så att testerna är oberoende av
 lagrens matematik. Jämför mot kontraktet i [cnn.h](./code/include/ml/cnn/cnn.h), och täck bland
 annat `train()` med ogiltiga argument samt `inputSize()` och `outputSize()`, även efter att ett
@@ -160,8 +146,8 @@ extra dense-lager har lagts till med `addDenseLayer()`.
 
 ---
 
-### **5.** Rätta buggarna i `Cnn` (8p · Maskininlärning)
-Rätta båda buggarna (4p styck), så att testfallen från uppgift 4 går igenom.
+### **5.** Rätta buggarna i `Cnn` (Maskininlärning, VG)
+Rätta båda buggarna, så att testfallen från uppgift 4 går igenom.
 
 ---
 
@@ -175,8 +161,8 @@ felmeddelande och prediktera rätt mönster.
 
 ### Muntlig genomgång
 Uppgiften redovisas därefter muntligt, cirka fem minuter per student. Ni visar er egen kod och går
-igenom den. Genomgången är ett villkor för betyg, inte en egen uppgift med egna poäng: poängen
-sätts på det ni lämnat in, men betyget rapporteras först när ni har redovisat.
+igenom den. Genomgången är ett villkor för betyg, inte en egen uppgift: betyget sätts på det ni
+lämnat in, men rapporteras först när ni har redovisat.
 
 Jag väljer ut någon eller några av buggarna, och ni får förklara:
 * Vad koden gjorde fel, och vad er rättning ändrar.

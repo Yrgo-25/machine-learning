@@ -1,7 +1,7 @@
 # L10 - Övningstentamen
 
 ## Dagordning
-* Genomförande av övningstentamen inför kommande praktiska prov.
+* Genomförande av övningstentamen inför det första praktiska provet.
 
 ---
 
@@ -9,7 +9,7 @@
 * Visa praktisk förståelse för feedforward, backpropagation samt optimering i dense-lager.
 * Visa förståelse för aktiveringsfunktioner och val av dessa.
 * Kunna hitta fel i en färdig implementation med hjälp av enhets- och komponenttester.
-* Identifiera eventuella kunskapsluckor inför det skarpa provet.
+* Identifiera eventuella kunskapsluckor inför det skarpa provet, som har samma form.
 
 ---
 
@@ -37,7 +37,10 @@
 ---
 
 ## Notering
-Det praktiska provet genomförs under L10 i kursen Mjuk- och hårdvarutestning.
+Det praktiska provet är utdelat; länken till provet finns i kursens Classroom. Provet genomförs
+som en inlämningsuppgift på egen hand, med muntlig redovisning efter deadline. **L10** i kursen
+Mjuk- och hårdvarutestning är avsatt för att arbeta med provet och slutföra det. Övningstentamen
+har samma form, så arbetssättet här är detsamma som på provet.
 
 ---
 
