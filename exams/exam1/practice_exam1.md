@@ -8,7 +8,17 @@ Denna tentamen är gemensam för kurserna **Maskininlärning** och **Mjuk- och h
 Betyg sätts separat per kurs enligt poänggränserna nedan.
 
 ### Hjälpmedel
-* En A4 med anteckningar.
+* En handskriven A4 med anteckningar, båda sidorna.
+    * **Rekommenderat innehåll:** algoritmerna för dense-lagret och det neurala nätverket, dvs.
+      stegen i feedforward, backpropagation och optimering, formlerna från **L05**, derivatorna för
+      aktiveringsfunktionerna, samt flödesscheman över hur lagren och nätverket hänger ihop. Det är
+      den sortens anteckningar provet belönar: ni behöver veta vad koden *borde* göra för att se
+      att den inte gör det.
+    * **Kod är tillåten i övrigt**, exempelvis hur ett testfall skrivs med `yrgo::test`, syntaxen
+      för `EXPECT_*` eller hur en `std::vector` deklareras.
+    * **Otillåtet:** avskrivna metoder ur kursens `ml`-kodbas, exempelvis `feedforward()`,
+      `backpropagate()` eller `optimize()` ur `Dense` eller `Shallow`. Skriv algoritmen, inte
+      implementationen.
 * Dator med textredigerare (t.ex. Visual Studio Code med IntelliSense).
 * Kodkomplettering, AI-verktyg och internetåtkomst är inte tillåtna.
 
