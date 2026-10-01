@@ -38,17 +38,17 @@ Erik Pihl ([erik.axel.pihl@gmail.com](mailto:erik.axel.pihl@gmail.com))
 
 ### Upplägg
 * Ett projekt (**P03**).
-* Två praktiska prov.
+* Två praktiska prov, genomförda som inlämningsuppgifter med muntlig redovisning.
 
 ### Poängfördelning
 * **P03** ger upp till 4 poäng per student (**G** = 2p, **VG** = 4p), satta individuellt enligt
   kriterierna i [projektbeskrivningen](../projects/P03/README.md#bedömning).
 * **Praktiskt prov 1** ger upp till 2 poäng (**G** = 1p, **VG** = 2p). Provet är gemensamt med
-  kursen Mjuk- och hårdvarutestning och genomförs under **L10 i den kursen**, eftersom den
-  lektionen infaller en vecka senare än denna kurss L10.
+  kursen Mjuk- och hårdvarutestning, delas ut i anslutning till **L10** och genomförs på egen hand
+  fram till angiven deadline. Därefter redovisas det muntligt.
 * **Praktiskt prov 2** ger upp till 2 poäng (**G** = 1p, **VG** = 2p). Provet är, precis som
-  **Praktiskt prov 1**, gemensamt med kursen Mjuk- och hårdvarutestning och genomförs under
-  motsvarande lektion i den kursen.
+  **Praktiskt prov 1**, gemensamt med kursen Mjuk- och hårdvarutestning, och genomförs på samma
+  sätt: en inlämningsuppgift på egen hand som därefter redovisas muntligt.
 
 ### Betygsnivåer
 Totalt 8 poäng:

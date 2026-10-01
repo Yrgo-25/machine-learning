@@ -346,7 +346,7 @@ tänkbara: en träning som rapporterar framgång trots att ingenting har hänt.
 
 ## Uppgift 2: argumentkontroller
 Kontrollerna i `Dense` är korrekta i den utlämnade koden, så dessa testfall går igenom direkt;
-poängen är oberoende av buggjakten. Exempeltestet `Dense.FeedforwardChecksInputSize` täcker
+uppgiften är oberoende av buggjakten. Exempeltestet `Dense.FeedforwardChecksInputSize` täcker
 `feedforward()`, så de efterfrågade testfallen är:
 
 ```cpp
@@ -399,6 +399,30 @@ kontroller; den hör till bugg 6 och bedöms där.
 | 6 | `source/ml/neural_network/shallow.cpp` | 67 | `train()` saknar den övre gränsen för lärhastigheten. |
 
 Radnumren avser den utlämnade koden, innan någon rättning har gjorts.
+
+---
+
+## Uppgift 6 och 7: edge cases samt konvergens (VG)
+Båda uppgifterna är oberoende av buggjakten och går igenom även med den utlämnade koden, med ett
+undantag: konvergenstestet misslyckas tills buggarna i `Dense` är rättade.
+
+**Edge cases.** Ett lager med en enda nod och en enda vikt, `Dense{1U, 1U}`, ska bete sig som
+vilket lager som helst; `nodeCount()` och `weightCount()` ska vara 1, och beräkningarna ska stämma
+mot samma formler. Träningsdata med olika många indata och utdata ska använda det minsta antalet:
+`train()` med tre indata och två utdata ska träna på två uppsättningar, returnera `true` och inte
+läsa utanför datan.
+
+**Konvergens.** Ett testfall som kräver att nätverket lär sig XOR-mönstret varje gång är inte
+pålitligt: med tio dolda noder, lärhastigheten `0.05` och 1000 epoker lär sig nätverket mönstret i
+ungefär åtta fall av tio, vilket betyder att ett sådant testfall slår fel var femte körning trots
+korrekt kod. Två formuleringar som däremot höll i samtliga körningar vid provkörning:
+* **Felet minskade:** medelabsolutfelet efter träningen är lägre än före, vilket höll i 200 av 200
+  körningar.
+* **Flera nätverk, majoriteten lyckas:** träna fem nätverk och kräv att minst tre av dem når ett
+  medelabsolutfel under `0.1`, vilket höll i 40 av 40 grupper.
+
+Godkänn vilken formulering som helst som är robust mot startvärdena, och underkänn den som kräver
+att en enskild körning lyckas. Att studenten kan motivera valet är hela poängen med uppgiften.
 
 ---
 
